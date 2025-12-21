@@ -1,13 +1,13 @@
 //
-//  GeminiUITestsLaunchTests.swift
-//  GeminiUITests
+//  TitanUITestsLaunchTests.swift
+//  TitanUITests
 //
 //  Created by Steve Simkins on 12/20/25.
 //
 
 import XCTest
 
-final class GeminiUITestsLaunchTests: XCTestCase {
+final class TitanUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

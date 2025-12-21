@@ -1,11 +1,11 @@
 //
-//  GeminiContentView.swift
-//  Gemini
+//  TitanContentView.swift
+//  Titan
 //
 
 import SwiftUI
 
-struct GeminiContentView: View {
+struct TitanContentView: View {
     let content: String
     let baseURL: String
     let onLinkTap: (String) -> Void
@@ -17,7 +17,7 @@ struct GeminiContentView: View {
     }
 
     var body: some View {
-        let lines = GeminiParser.parse(content, baseURL: baseURL)
+        let lines = TitanParser.parse(content, baseURL: baseURL)
 
         LazyVStack(alignment: .leading, spacing: 4) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
@@ -28,7 +28,7 @@ struct GeminiContentView: View {
     }
 
     @ViewBuilder
-    private func lineView(for line: GeminiLine) -> some View {
+    private func lineView(for line: TitanLine) -> some View {
         switch line {
         case .text(let text):
             Text(text)

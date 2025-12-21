@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  Gemini
+//  Titan
 //
 
 import SwiftUI
@@ -26,7 +26,7 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 12) {
             ScrollView {
-                GeminiContentView(content: responseText, baseURL: urlText, onLinkTap: { url in
+                TitanContentView(content: responseText, baseURL: urlText, onLinkTap: { url in
                     navigateTo(url)
                 })
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -170,13 +170,13 @@ struct ContentView: View {
         }
     }
 
-    private func fetchWithRedirects(urlString: String, redirectCount: Int) async throws -> (GeminiResponse, String) {
+    private func fetchWithRedirects(urlString: String, redirectCount: Int) async throws -> (TitanResponse, String) {
         guard let url = URL(string: urlString),
               let host = url.host else {
-            throw GeminiError.invalidURL
+            throw TitanError.invalidURL
         }
 
-        let client = GeminiClient(rejectUnauthorized: false)
+        let client = TitanClient(rejectUnauthorized: false)
         let port = url.port ?? 1965
         let response = try await client.connect(
             hostname: host,

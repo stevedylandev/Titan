@@ -1,6 +1,6 @@
 //
-//  GeminiClient.swift
-//  Gemini
+//  TitanClient.swift
+//  Titan
 //
 //  Created by Steve Simkins on 12/20/25.
 //
@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - Response Types
 
-struct GeminiResponse {
+struct TitanResponse {
     let statusCode: Int
     let meta: String
     let body: Data?
@@ -34,7 +34,7 @@ struct GeminiResponse {
     }
 }
 
-enum GeminiError: LocalizedError {
+enum TitanError: LocalizedError {
     case invalidResponse
     case invalidURL
 
@@ -48,7 +48,7 @@ enum GeminiError: LocalizedError {
 
 // MARK: - Client
 
-class GeminiClient {
+class TitanClient {
     let rejectUnauthorized: Bool
     
     init(rejectUnauthorized: Bool = true) {
@@ -59,7 +59,7 @@ class GeminiClient {
         hostname: String,
         port: Int = 1965,
         urlString: String
-    ) async throws -> GeminiResponse {
+    ) async throws -> TitanResponse {
         let host = NWEndpoint.Host(hostname)
         let port = NWEndpoint.Port(integerLiteral: UInt16(port))
         
@@ -84,7 +84,7 @@ class GeminiClient {
         let connection = NWConnection(host: host, port: port, using: parameters)
         let state = ConnectionState()
         
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<GeminiResponse, Error>) in
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<TitanResponse, Error>) in
             connection.stateUpdateHandler = { connectionState in
                 switch connectionState {
                 case .ready:
@@ -144,22 +144,22 @@ class GeminiClient {
         }
     }
 
-    private func parseResponse(_ data: Data) throws -> GeminiResponse {
+    private func parseResponse(_ data: Data) throws -> TitanResponse {
         // Find the first CRLF which separates header from body
         let crlf = Data([0x0D, 0x0A]) // \r\n
         guard let crlfRange = data.range(of: crlf) else {
-            throw GeminiError.invalidResponse
+            throw TitanError.invalidResponse
         }
 
         let headerData = data[..<crlfRange.lowerBound]
         guard let headerString = String(data: headerData, encoding: .utf8) else {
-            throw GeminiError.invalidResponse
+            throw TitanError.invalidResponse
         }
 
         // Parse status code (first 2 characters)
         guard headerString.count >= 2,
               let statusCode = Int(headerString.prefix(2)) else {
-            throw GeminiError.invalidResponse
+            throw TitanError.invalidResponse
         }
 
         // Meta is everything after status code and space
@@ -176,7 +176,7 @@ class GeminiClient {
 
         print("📥 Status: \(statusCode), Meta: \(meta)")
 
-        return GeminiResponse(statusCode: statusCode, meta: meta, body: body)
+        return TitanResponse(statusCode: statusCode, meta: meta, body: body)
     }
     
     // Helper class to manage connection state
