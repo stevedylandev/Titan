@@ -118,12 +118,12 @@ struct GeminiContentView: View {
 
         case .link(let url, let label):
             Button(action: { onLinkTap(url) }) {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.right")
-                        .font(.system(.caption, design: .monospaced))
+                HStack(alignment:.top, spacing: 4) {
+                    Text("=>")
+                        .font(.system(size: 14, design: .monospaced))
                     Text(label)
                         .multilineTextAlignment(.leading)
-                        .font(.system(.caption, design: .monospaced))
+                        .font(.system(size: 14, design: .monospaced))
                 }
             }
             .foregroundColor(.blue)
