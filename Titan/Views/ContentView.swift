@@ -25,18 +25,30 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            ScrollView {
-                TitanContentView(content: responseText, baseURL: urlText, onLinkTap: { url in
-                    navigateTo(url)
-                })
-                .frame(maxWidth: .infinity, alignment: .leading)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    TitanContentView(content: responseText, baseURL: urlText, onLinkTap: { url in
+                        navigateTo(url)
+                    })
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
+                    .id("top")
+                }
+                .onChange(of: responseText) {
+                    withAnimation {
+                        proxy.scrollTo("top", anchor: .top)
+                    }
+                }
+                .ignoresSafeArea(edges: .top)
+                .contentMargins(.top, 60, for: .scrollContent)
             }
 
-            HStack(spacing: 8) {
+            HStack(spacing: 20) {
                 // Back button
                 Button(action: goBack) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
+                        .padding(.leading, 6)
                 }
                 .disabled(!canGoBack || isLoading)
 
@@ -63,15 +75,18 @@ struct ContentView: View {
                     } else {
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.title2)
+                            .foregroundColor(.orange)
                     }
                 }
                 .disabled(isLoading || urlText.isEmpty)
             }
+            .padding(.horizontal)
+            .padding(.bottom, 8)
         }
-        .padding()
         .onAppear {
             navigateTo(urlText)
         }
+        .ignoresSafeArea(edges: .top)
         .alert("Input Required", isPresented: $showInputPrompt) {
             if inputIsSensitive {
                 SecureField("Enter input", text: $inputValue)
@@ -87,6 +102,7 @@ struct ContentView: View {
         } message: {
             Text(inputPromptText)
         }
+        
     }
 
     private func submitInput() {

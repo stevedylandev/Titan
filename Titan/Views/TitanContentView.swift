@@ -44,7 +44,7 @@ struct TitanContentView: View {
                         .font(.system(size: 14, design: .monospaced))
                 }
             }
-            .foregroundColor(.blue)
+            .foregroundColor(.orange)
 
         case .heading1(let text):
             Text(text)
