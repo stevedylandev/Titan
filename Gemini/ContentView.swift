@@ -238,6 +238,9 @@ struct ContentView: View {
             }
         }
         .padding()
+        .onAppear {
+            navigateTo(urlText)
+        }
         .alert("Input Required", isPresented: $showInputPrompt) {
             if inputIsSensitive {
                 SecureField("Enter input", text: $inputValue)
