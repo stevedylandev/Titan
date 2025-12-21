@@ -21,6 +21,10 @@ struct ContentView: View {
     @State private var history: [String] = []
     @State private var historyIndex = -1
 
+    // Media preview state
+    @State private var showMediaPreview = false
+    @State private var mediaContent: MediaContent?
+
     private let maxRedirects = 5
 
     var body: some View {
@@ -49,6 +53,7 @@ struct ContentView: View {
                     Image(systemName: "chevron.left")
                         .font(.title2)
                         .padding(.leading, 6)
+                        .foregroundColor(.orange)
                 }
                 .disabled(!canGoBack || isLoading)
 
@@ -56,6 +61,7 @@ struct ContentView: View {
                 Button(action: goForward) {
                     Image(systemName: "chevron.right")
                         .font(.title2)
+                        .foregroundColor(.orange)
                 }
                 .disabled(!canGoForward || isLoading)
 
@@ -102,7 +108,14 @@ struct ContentView: View {
         } message: {
             Text(inputPromptText)
         }
-        
+        .fullScreenCover(isPresented: $showMediaPreview) {
+            if let media = mediaContent {
+                MediaPreviewView(media: media) {
+                    showMediaPreview = false
+                    mediaContent = nil
+                }
+            }
+        }
     }
 
     private func submitInput() {
@@ -160,10 +173,27 @@ struct ContentView: View {
 
                 switch response.statusCategory {
                 case .success:
-                    responseText = response.bodyText ?? "(empty response)"
-                    if addToHistory {
-                        history.append(finalURL)
-                        historyIndex = history.count - 1
+                    let mimeType = response.meta
+
+                    if MediaType.isMediaContent(mimeType) {
+                        // Handle media content (images, audio)
+                        if let body = response.body {
+                            mediaContent = MediaContent(
+                                data: body,
+                                mimeType: mimeType,
+                                sourceURL: finalURL
+                            )
+                            showMediaPreview = true
+                        } else {
+                            responseText = "(empty media response)"
+                        }
+                    } else {
+                        // Handle text content (text/gemini, text/plain, etc.)
+                        responseText = response.bodyText ?? "(empty response)"
+                        if addToHistory {
+                            history.append(finalURL)
+                            historyIndex = history.count - 1
+                        }
                     }
                 case .input:
                     pendingInputURL = finalURL
