@@ -47,44 +47,42 @@ struct ContentView: View {
                 .contentMargins(.top, 60, for: .scrollContent)
             }
 
-            HStack(spacing: 20) {
-                // Back button
+            HStack(spacing: 12) {
+                // Back button - always visible, grayed out when disabled
                 Button(action: goBack) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
-                        .padding(.leading, 6)
-                        .foregroundColor(.orange)
+                        .foregroundColor(canGoBack && !isLoading ? .orange : .gray.opacity(0.4))
                 }
                 .disabled(!canGoBack || isLoading)
 
-                // Forward button
-                Button(action: goForward) {
-                    Image(systemName: "chevron.right")
-                        .font(.title2)
-                        .foregroundColor(.orange)
-                }
-                .disabled(!canGoForward || isLoading)
-
-                TextField("Enter Gemini URL", text: $urlText)
-                    .textFieldStyle(.roundedBorder)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .keyboardType(.URL)
-                    .onSubmit {
-                        navigateTo(urlText)
+                // Forward button - only visible when there's history to go forward
+                if canGoForward {
+                    Button(action: goForward) {
+                        Image(systemName: "chevron.right")
+                            .font(.title2)
+                            .foregroundColor(isLoading ? .gray.opacity(0.4) : .orange)
                     }
+                    .disabled(isLoading)
+                }
 
-                Button(action: { navigateTo(urlText) }) {
+                ZStack(alignment: .trailing) {
+                    TextField("Enter Gemini URL", text: $urlText)
+                        .textFieldStyle(.roundedBorder)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.URL)
+                        .submitLabel(.go)
+                        .onSubmit {
+                            navigateTo(urlText)
+                        }
+
                     if isLoading {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle())
-                    } else {
-                        Image(systemName: "arrow.right.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.orange)
+                            .padding(.trailing, 8)
                     }
                 }
-                .disabled(isLoading || urlText.isEmpty)
             }
             .padding(.horizontal)
             .padding(.bottom, 8)

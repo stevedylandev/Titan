@@ -37,8 +37,6 @@ struct TitanContentView: View {
         case .link(let url, let label):
             Button(action: { onLinkTap(url) }) {
                 HStack(alignment:.top, spacing: 4) {
-                    Text("=>")
-                        .font(.system(size: 14, design: .monospaced))
                     Text(label)
                         .multilineTextAlignment(.leading)
                         .font(.system(size: 14, design: .monospaced))
