@@ -13,6 +13,5 @@ enum TitanLine {
     case heading3(String)
     case listItem(String)
     case quote(String)
-    case preformattedToggle(alt: String)
-    case preformatted(String)
+    case preformattedBlock(String, alt: String)
 }

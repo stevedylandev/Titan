@@ -9,17 +9,27 @@ struct TitanParser {
     static func parse(_ content: String, baseURL: String) -> [TitanLine] {
         var lines: [TitanLine] = []
         var inPreformatted = false
+        var preformattedLines: [String] = []
+        var preformattedAlt = ""
 
         for line in content.components(separatedBy: .newlines) {
             if line.hasPrefix("```") {
+                if inPreformatted {
+                    // End of preformatted block - emit the collected lines
+                    let blockContent = preformattedLines.joined(separator: "\n")
+                    lines.append(.preformattedBlock(blockContent, alt: preformattedAlt))
+                    preformattedLines = []
+                    preformattedAlt = ""
+                } else {
+                    // Start of preformatted block
+                    preformattedAlt = String(line.dropFirst(3))
+                }
                 inPreformatted.toggle()
-                let alt = String(line.dropFirst(3))
-                lines.append(.preformattedToggle(alt: alt))
                 continue
             }
 
             if inPreformatted {
-                lines.append(.preformatted(line))
+                preformattedLines.append(line)
                 continue
             }
 
@@ -40,6 +50,12 @@ struct TitanParser {
             } else {
                 lines.append(.text(line))
             }
+        }
+
+        // Handle unclosed preformatted block
+        if !preformattedLines.isEmpty {
+            let blockContent = preformattedLines.joined(separator: "\n")
+            lines.append(.preformattedBlock(blockContent, alt: preformattedAlt))
         }
 
         return lines

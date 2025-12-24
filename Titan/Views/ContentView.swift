@@ -137,6 +137,15 @@ struct ContentView: View {
     }
 
     private func navigateTo(_ url: String) {
+        // Check if this is an external URL (http, https, mailto)
+        if let urlObj = URL(string: url) {
+            let scheme = urlObj.scheme?.lowercased() ?? ""
+            if scheme == "http" || scheme == "https" || scheme == "mailto" {
+                UIApplication.shared.open(urlObj)
+                return
+            }
+        }
+
         if historyIndex < history.count - 1 {
             history = Array(history.prefix(historyIndex + 1))
         }

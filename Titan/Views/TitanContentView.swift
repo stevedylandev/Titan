@@ -43,6 +43,7 @@ struct TitanContentView: View {
                 }
             }
             .foregroundColor(.orange)
+            .padding(.vertical, 6)
 
         case .heading1(let text):
             Text(text)
@@ -76,14 +77,14 @@ struct TitanContentView: View {
                 .foregroundColor(.secondary)
                 .padding(.leading, 12)
 
-        case .preformattedToggle:
-            EmptyView()
-
-        case .preformatted(let text):
-            Text(text)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundColor(.secondary)
-                .padding(.leading, 8)
+        case .preformattedBlock(let text, _):
+            ScrollView(.horizontal, showsIndicators: false) {
+                Text(text)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+            .padding(.vertical, 4)
         }
     }
 }
