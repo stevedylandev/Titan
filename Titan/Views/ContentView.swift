@@ -53,6 +53,10 @@ struct ContentView: View {
     // Current fetch task (for cancellation)
     @State private var currentFetchTask: Task<Void, Never>?
 
+    // Bookmarks
+    @State private var bookmarkManager = BookmarkManager()
+    @State private var showBookmarks = false
+
     private let maxRedirects = 5
 
     var body: some View {
@@ -123,6 +127,25 @@ struct ContentView: View {
                                 } label: {
                                     Label("Home", systemImage: "house")
                                 }
+
+                                Divider()
+
+                                Button {
+                                    addCurrentPageToBookmarks()
+                                } label: {
+                                    if bookmarkManager.isBookmarked(url: urlText) {
+                                        Label("Bookmarked", systemImage: "bookmark.fill")
+                                    } else {
+                                        Label("Add Bookmark", systemImage: "bookmark")
+                                    }
+                                }
+                                .disabled(urlText.isEmpty || bookmarkManager.isBookmarked(url: urlText))
+
+                                Button {
+                                    showBookmarks = true
+                                } label: {
+                                    Label("Bookmarks", systemImage: "book")
+                                }
                             } label: {
                                 Image(systemName: "ellipsis.circle")
                                     .font(.title2)
@@ -164,6 +187,12 @@ struct ContentView: View {
                 }
             }
         }
+        .sheet(isPresented: $showBookmarks) {
+            BookmarksListView(bookmarkManager: bookmarkManager) { bookmark in
+                showBookmarks = false
+                navigateTo(bookmark.url)
+            }
+        }
     }
 
     private func submitInput() {
@@ -174,6 +203,27 @@ struct ContentView: View {
         inputValue = ""
 
         navigateTo(urlWithQuery)
+    }
+
+    // MARK: - Bookmarks
+
+    private func addCurrentPageToBookmarks() {
+        guard !urlText.isEmpty else { return }
+        let title = extractPageTitle() ?? urlText
+        bookmarkManager.addBookmark(url: urlText, title: title)
+    }
+
+    private func extractPageTitle() -> String? {
+        let lines = TitanParser.parse(responseText, baseURL: urlText)
+        for line in lines {
+            switch line {
+            case .heading1(let text), .heading2(let text), .heading3(let text):
+                return text
+            default:
+                continue
+            }
+        }
+        return nil
     }
 
     // MARK: - Navigation History
