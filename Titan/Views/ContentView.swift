@@ -5,6 +5,26 @@
 
 import SwiftUI
 
+struct IndeterminateProgressBar: View {
+    @State private var animationOffset: CGFloat = -1.0
+
+    var body: some View {
+        GeometryReader { geometry in
+            Rectangle()
+                .fill(Color.orange)
+                .frame(width: geometry.size.width * 0.3)
+                .offset(x: animationOffset * geometry.size.width)
+        }
+        .frame(height: 3)
+        .clipped()
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                animationOffset = 1.0
+            }
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var urlText = "gemini://geminiprotocol.net/"
     @State private var responseText = ""
@@ -47,25 +67,32 @@ struct ContentView: View {
                 .contentMargins(.top, 60, for: .scrollContent)
             }
 
-            HStack(spacing: 12) {
-                // Navigation buttons - always visible, grayed out when disabled
-                Button(action: goBack) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(canGoBack && !isLoading ? .orange : .gray.opacity(0.4))
+            VStack(spacing: 0) {
+                if isLoading {
+                    IndeterminateProgressBar()
+                } else {
+                    Color.clear
+                        .frame(height: 3)
                 }
-                .disabled(!canGoBack || isLoading)
-                .padding(.trailing, 8)
 
-                Button(action: goForward) {
-                    Image(systemName: "chevron.right")
-                        .font(.title2)
-                        .foregroundColor(canGoForward && !isLoading ? .orange : .gray.opacity(0.4))
-                }
-                .disabled(!canGoForward || isLoading)
-                
+                HStack(spacing: 12) {
+                    // Navigation buttons - always visible, grayed out when disabled
+                    Button(action: goBack) {
+                        Image(systemName: "chevron.left")
+                            .font(.title2)
+                            .foregroundColor(canGoBack && !isLoading ? .orange : .gray.opacity(0.4))
+                    }
+                    .disabled(!canGoBack || isLoading)
+                    .padding(.trailing, 8)
 
-                ZStack(alignment: .trailing) {
+                    Button(action: goForward) {
+                        Image(systemName: "chevron.right")
+                            .font(.title2)
+                            .foregroundColor(canGoForward && !isLoading ? .orange : .gray.opacity(0.4))
+                    }
+                    .disabled(!canGoForward || isLoading)
+
+
                     TextField("Enter Gemini URL", text: $urlText)
                         .textFieldStyle(.roundedBorder)
                         .autocapitalization(.none)
@@ -75,12 +102,8 @@ struct ContentView: View {
                         .onSubmit {
                             navigateTo(urlText)
                         }
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                            .padding(.trailing, 8)
-                    }
                 }
+                .padding(.top, 8)
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 8)
