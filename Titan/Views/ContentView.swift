@@ -170,6 +170,10 @@ struct ContentView: View {
             }
         }
 
+        if historyIndex < history.count - 1 {
+            history = Array(history.prefix(historyIndex + 1))
+        }
+
         urlText = url
         fetchContent(addToHistory: true)
     }
@@ -208,16 +212,6 @@ struct ContentView: View {
                 case .success:
                     let mimeType = response.meta
 
-                    // Add to history on successful navigation (before showing content)
-                    if addToHistory {
-                        // Truncate forward history when navigating to a new page
-                        if historyIndex < history.count - 1 {
-                            history = Array(history.prefix(historyIndex + 1))
-                        }
-                        history.append(finalURL)
-                        historyIndex = history.count - 1
-                    }
-
                     if MediaType.isMediaContent(mimeType) {
                         // Handle media content (images, audio)
                         if let body = response.body {
@@ -233,6 +227,10 @@ struct ContentView: View {
                     } else {
                         // Handle text content (text/gemini, text/plain, etc.)
                         responseText = response.bodyText ?? "(empty response)"
+                        if addToHistory {
+                            history.append(finalURL)
+                            historyIndex = history.count - 1
+                        }
                     }
                 case .input:
                     pendingInputURL = finalURL
