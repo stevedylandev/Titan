@@ -37,11 +37,13 @@ struct TitanResponse {
 enum TitanError: LocalizedError {
     case invalidResponse
     case invalidURL
+    case cancelled
 
     var errorDescription: String? {
         switch self {
         case .invalidResponse: return "Invalid response from server"
         case .invalidURL: return "Invalid URL"
+        case .cancelled: return "Request cancelled"
         }
     }
 }
@@ -62,7 +64,7 @@ class TitanClient {
     ) async throws -> TitanResponse {
         let host = NWEndpoint.Host(hostname)
         let port = NWEndpoint.Port(integerLiteral: UInt16(port))
-        
+
         let tlsOptions = NWProtocolTLS.Options()
         let rejectUnauthorized = self.rejectUnauthorized  // Capture the value, not self
 
@@ -83,47 +85,68 @@ class TitanClient {
         let parameters = NWParameters(tls: tlsOptions)
         let connection = NWConnection(host: host, port: port, using: parameters)
         let state = ConnectionState()
-        
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<TitanResponse, Error>) in
-            connection.stateUpdateHandler = { connectionState in
-                switch connectionState {
-                case .ready:
-                    print("✓ TLS connection established\n")
-                    let request = urlString + "\r\n"
-                    print("📤 Request: \(request.trimmingCharacters(in: .whitespacesAndNewlines))")
-                    
-                    if let requestData = request.data(using: .utf8) {
-                        connection.send(content: requestData, completion: .idempotent)
-                    }
-                    
-                    self.receiveData(connection: connection, state: state)
-                    
-                case .failed(let error):
-                    print("❌ Error: \(error)")
-                    connection.cancel()
-                    if !state.continuationResumed {
-                        state.continuationResumed = true
-                        continuation.resume(throwing: error)
-                    }
-                    
-                case .cancelled:
-                    print("✓ Connection closed by server\n")
-                    if !state.continuationResumed {
-                        state.continuationResumed = true
-                        do {
-                            let response = try self.parseResponse(state.responseData)
-                            continuation.resume(returning: response)
-                        } catch {
+
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<TitanResponse, Error>) in
+                connection.stateUpdateHandler = { connectionState in
+                    switch connectionState {
+                    case .ready:
+                        // Check for cancellation before sending request
+                        if Task.isCancelled {
+                            connection.cancel()
+                            if !state.continuationResumed {
+                                state.continuationResumed = true
+                                continuation.resume(throwing: TitanError.cancelled)
+                            }
+                            return
+                        }
+
+                        print("✓ TLS connection established\n")
+                        let request = urlString + "\r\n"
+                        print("📤 Request: \(request.trimmingCharacters(in: .whitespacesAndNewlines))")
+
+                        if let requestData = request.data(using: .utf8) {
+                            connection.send(content: requestData, completion: .idempotent)
+                        }
+
+                        self.receiveData(connection: connection, state: state)
+
+                    case .failed(let error):
+                        print("❌ Error: \(error)")
+                        connection.cancel()
+                        if !state.continuationResumed {
+                            state.continuationResumed = true
                             continuation.resume(throwing: error)
                         }
+
+                    case .cancelled:
+                        if !state.continuationResumed {
+                            state.continuationResumed = true
+                            // Check if this was a user-initiated cancellation
+                            if state.wasCancelled {
+                                print("✓ Request cancelled\n")
+                                continuation.resume(throwing: TitanError.cancelled)
+                            } else {
+                                print("✓ Connection closed by server\n")
+                                do {
+                                    let response = try self.parseResponse(state.responseData)
+                                    continuation.resume(returning: response)
+                                } catch {
+                                    continuation.resume(throwing: error)
+                                }
+                            }
+                        }
+
+                    default:
+                        break
                     }
-                    
-                default:
-                    break
                 }
+
+                connection.start(queue: .global())
             }
-            
-            connection.start(queue: .global())
+        } onCancel: {
+            state.wasCancelled = true
+            connection.cancel()
         }
     }
     
@@ -180,10 +203,11 @@ class TitanClient {
     }
     
     // Helper class to manage connection state
-    private class ConnectionState {
+    private class ConnectionState: @unchecked Sendable {
         var chunks: [Data] = []
         var continuationResumed = false
-        
+        var wasCancelled = false
+
         var responseData: Data {
             chunks.reduce(Data(), +)
         }

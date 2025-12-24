@@ -45,6 +45,9 @@ struct ContentView: View {
     @State private var showMediaPreview = false
     @State private var mediaContent: MediaContent?
 
+    // Current fetch task (for cancellation)
+    @State private var currentFetchTask: Task<Void, Never>?
+
     private let maxRedirects = 5
 
     var body: some View {
@@ -186,10 +189,16 @@ struct ContentView: View {
     }
 
     private func fetchContent(addToHistory: Bool = true) {
+        // Cancel any pending request before starting a new one
+        currentFetchTask?.cancel()
+
         isLoading = true
-        Task {
+        currentFetchTask = Task {
             do {
                 let (response, finalURL) = try await fetchWithRedirects(urlString: urlText, redirectCount: 0)
+
+                // Check if task was cancelled during fetch
+                if Task.isCancelled { return }
 
                 if finalURL != urlText {
                     urlText = finalURL
@@ -239,14 +248,24 @@ struct ContentView: View {
                 case .clientCertificate:
                     responseText = "Client certificate required: \(response.meta)"
                 }
+                isLoading = false
+            } catch is CancellationError {
+                // Task was cancelled, don't update UI
+                return
+            } catch let error as TitanError where error == .cancelled {
+                // Request was cancelled, don't update UI
+                return
             } catch {
                 responseText = "Error: \(error.localizedDescription)"
+                isLoading = false
             }
-            isLoading = false
         }
     }
 
     private func fetchWithRedirects(urlString: String, redirectCount: Int) async throws -> (TitanResponse, String) {
+        // Check for cancellation before starting
+        try Task.checkCancellation()
+
         guard let url = URL(string: urlString),
               let host = url.host else {
             throw TitanError.invalidURL
@@ -259,6 +278,9 @@ struct ContentView: View {
             port: port,
             urlString: urlString
         )
+
+        // Check for cancellation after fetch
+        try Task.checkCancellation()
 
         if response.statusCategory == .redirect {
             guard redirectCount < maxRedirects else {
