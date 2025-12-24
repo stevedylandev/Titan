@@ -79,23 +79,27 @@ struct ContentView: View {
 
                     GlassEffectContainer {
                         HStack(spacing: 12) {
-                            // Navigation buttons with glass effect
-                            Button(action: goBack) {
-                                Image(systemName: "chevron.left")
-                                    .font(.title2)
-                                    .foregroundStyle(canGoBack && !isLoading ? .primary : .tertiary)
-                                    .frame(width: 44, height: 44)
-                            }
-                            .disabled(!canGoBack || isLoading)
-                            .glassEffect(.regular.interactive())
+                            // Navigation buttons in a single pill
+                            HStack(spacing: 0) {
+                                Button(action: goBack) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.title2)
+                                        .foregroundStyle(canGoBack && !isLoading ? .primary : .tertiary)
+                                        .frame(width: 44, height: 44)
+                                }
+                                .disabled(!canGoBack || isLoading)
 
-                            Button(action: goForward) {
-                                Image(systemName: "chevron.right")
-                                    .font(.title2)
-                                    .foregroundStyle(canGoForward && !isLoading ? .primary : .tertiary)
-                                    .frame(width: 44, height: 44)
+                                Divider()
+                                    .frame(height: 24)
+
+                                Button(action: goForward) {
+                                    Image(systemName: "chevron.right")
+                                        .font(.title2)
+                                        .foregroundStyle(canGoForward && !isLoading ? .primary : .tertiary)
+                                        .frame(width: 44, height: 44)
+                                }
+                                .disabled(!canGoForward || isLoading)
                             }
-                            .disabled(!canGoForward || isLoading)
                             .glassEffect(.regular.interactive())
 
                             TextField("Enter Gemini URL", text: $urlText)
