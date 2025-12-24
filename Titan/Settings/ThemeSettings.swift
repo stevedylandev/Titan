@@ -23,6 +23,9 @@ class ThemeSettings: ObservableObject {
 
     /// The color used for toolbar buttons (navigation, menu, etc.)
     @Published var toolbarButtonColor: Color = .blue
+
+    /// The home page URL that the browser navigates to on launch and when pressing Home
+    @AppStorage("homePage") var homePage: String = "gemini://geminiprotocol.net/"
 }
 
 // MARK: - Environment Key

@@ -28,8 +28,6 @@ struct IndeterminateProgressBar: View {
 }
 
 struct ContentView: View {
-    private let homeSite = "gemini://geminiprotocol.net/"
-
     @Environment(\.themeSettings) private var themeSettings
     @State private var urlText = ""
     @State private var responseText = ""
@@ -56,6 +54,9 @@ struct ContentView: View {
     // Bookmarks
     @State private var bookmarkManager = BookmarkManager()
     @State private var showBookmarks = false
+
+    // Settings
+    @State private var showSettings = false
 
     private let maxRedirects = 5
 
@@ -122,14 +123,21 @@ struct ContentView: View {
                                 .glassEffect(.regular, in: .capsule)
 
                             Menu {
-                                Button {
-                                    navigateTo(homeSite)
-                                } label: {
-                                    Label("Home", systemImage: "house")
-                                }
 
+                                Button {
+                                    showSettings = true
+                                } label: {
+                                    Label("Settings", systemImage: "gear")
+                                }
+                                
                                 Divider()
 
+                                Button {
+                                    showBookmarks = true
+                                } label: {
+                                    Label("Bookmarks", systemImage: "book")
+                                }
+                                
                                 Button {
                                     addCurrentPageToBookmarks()
                                 } label: {
@@ -141,10 +149,12 @@ struct ContentView: View {
                                 }
                                 .disabled(urlText.isEmpty || bookmarkManager.isBookmarked(url: urlText))
 
+                                Divider()
+                                
                                 Button {
-                                    showBookmarks = true
+                                    navigateTo(themeSettings.homePage)
                                 } label: {
-                                    Label("Bookmarks", systemImage: "book")
+                                    Label("Home", systemImage: "house")
                                 }
                             } label: {
                                 Image(systemName: "ellipsis.circle")
@@ -162,7 +172,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            navigateTo(homeSite)
+            navigateTo(themeSettings.homePage)
         }
         .alert("Input Required", isPresented: $showInputPrompt) {
             if inputIsSensitive {
@@ -192,6 +202,9 @@ struct ContentView: View {
                 showBookmarks = false
                 navigateTo(bookmark.url)
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
     }
 
