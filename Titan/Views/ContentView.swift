@@ -53,82 +53,87 @@ struct ContentView: View {
     private let maxRedirects = 5
 
     var body: some View {
-        VStack(spacing: 12) {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    TitanContentView(content: responseText, baseURL: urlText, onLinkTap: { url in
-                        navigateTo(url)
-                    })
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
-                    .id("top")
-                }
-                .onChange(of: responseText) {
-                    withAnimation {
-                        proxy.scrollTo("top", anchor: .top)
-                    }
-                }
-                .ignoresSafeArea(edges: .top)
-                .contentMargins(.top, 60, for: .scrollContent)
+        ScrollViewReader { proxy in
+            ScrollView {
+                TitanContentView(content: responseText, baseURL: urlText, onLinkTap: { url in
+                    navigateTo(url)
+                })
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 4)
+                .id("top")
             }
-
-            VStack(spacing: 0) {
-                if isLoading {
-                    IndeterminateProgressBar()
-                } else {
-                    Color.clear
-                        .frame(height: 3)
+            .onChange(of: responseText) {
+                withAnimation {
+                    proxy.scrollTo("top", anchor: .top)
                 }
-
-                HStack(spacing: 12) {
-                    // Navigation buttons - always visible, grayed out when disabled
-                    Button(action: goBack) {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                            .foregroundColor(canGoBack && !isLoading ? .orange : .gray.opacity(0.4))
-                    }
-                    .disabled(!canGoBack || isLoading)
-                    .padding(.trailing, 8)
-
-                    Button(action: goForward) {
-                        Image(systemName: "chevron.right")
-                            .font(.title2)
-                            .foregroundColor(canGoForward && !isLoading ? .orange : .gray.opacity(0.4))
-                    }
-                    .disabled(!canGoForward || isLoading)
-
-
-                    TextField("Enter Gemini URL", text: $urlText)
-                        .textFieldStyle(.roundedBorder)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                        .keyboardType(.URL)
-                        .submitLabel(.go)
-                        .onSubmit {
-                            navigateTo(urlText)
-                        }
-
-                    Menu {
-                        Button {
-                            navigateTo(homeSite)
-                        } label: {
-                            Label("Home", systemImage: "house")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .font(.title2)
-                            .foregroundColor(.orange)
-                    }
-                }
-                .padding(.top, 8)
             }
-            .padding(.horizontal, 30)
-            .padding(.bottom, 8)
+            .contentMargins(.top, 20, for: .scrollContent)
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 0) {
+                    if isLoading {
+                        IndeterminateProgressBar()
+                    } else {
+                        Color.clear
+                            .frame(height: 3)
+                    }
+
+                    GlassEffectContainer {
+                        HStack(spacing: 12) {
+                            // Navigation buttons with glass effect
+                            Button(action: goBack) {
+                                Image(systemName: "chevron.left")
+                                    .font(.title2)
+                                    .foregroundStyle(canGoBack && !isLoading ? .primary : .tertiary)
+                                    .frame(width: 44, height: 44)
+                            }
+                            .disabled(!canGoBack || isLoading)
+                            .glassEffect(.regular.interactive())
+
+                            Button(action: goForward) {
+                                Image(systemName: "chevron.right")
+                                    .font(.title2)
+                                    .foregroundStyle(canGoForward && !isLoading ? .primary : .tertiary)
+                                    .frame(width: 44, height: 44)
+                            }
+                            .disabled(!canGoForward || isLoading)
+                            .glassEffect(.regular.interactive())
+
+                            TextField("Enter Gemini URL", text: $urlText)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .keyboardType(.URL)
+                                .submitLabel(.go)
+                                .onSubmit {
+                                    navigateTo(urlText)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 10)
+                                .glassEffect(.regular, in: .capsule)
+
+                            Menu {
+                                Button {
+                                    navigateTo(homeSite)
+                                } label: {
+                                    Label("Home", systemImage: "house")
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .font(.title2)
+                                    .foregroundStyle(.primary)
+                                    .frame(width: 44, height: 44)
+                            }
+                            .glassEffect(.regular.interactive())
+                        }
+                    }
+                    .padding(.top, 8)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
+            }
         }
         .onAppear {
             navigateTo(homeSite)
         }
-        .ignoresSafeArea(edges: .top)
         .alert("Input Required", isPresented: $showInputPrompt) {
             if inputIsSensitive {
                 SecureField("Enter input", text: $inputValue)

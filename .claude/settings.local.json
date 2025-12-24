@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.donnywals.com)",
+      "WebFetch(domain:levelup.gitconnected.com)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
