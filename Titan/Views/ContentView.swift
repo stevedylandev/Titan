@@ -48,7 +48,7 @@ struct ContentView: View {
             }
 
             HStack(spacing: 12) {
-                // Back button - always visible, grayed out when disabled
+                // Navigation buttons - always visible, grayed out when disabled
                 Button(action: goBack) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
@@ -56,15 +56,12 @@ struct ContentView: View {
                 }
                 .disabled(!canGoBack || isLoading)
 
-                // Forward button - only visible when there's history to go forward
-                if canGoForward {
-                    Button(action: goForward) {
-                        Image(systemName: "chevron.right")
-                            .font(.title2)
-                            .foregroundColor(isLoading ? .gray.opacity(0.4) : .orange)
-                    }
-                    .disabled(isLoading)
+                Button(action: goForward) {
+                    Image(systemName: "chevron.right")
+                        .font(.title2)
+                        .foregroundColor(canGoForward && !isLoading ? .orange : .gray.opacity(0.4))
                 }
+                .disabled(!canGoForward || isLoading)
 
                 ZStack(alignment: .trailing) {
                     TextField("Enter Gemini URL", text: $urlText)
@@ -76,7 +73,6 @@ struct ContentView: View {
                         .onSubmit {
                             navigateTo(urlText)
                         }
-
                     if isLoading {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle())
@@ -84,7 +80,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 30)
             .padding(.bottom, 8)
         }
         .onAppear {

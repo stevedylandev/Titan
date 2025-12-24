@@ -5,6 +5,48 @@
 
 import SwiftUI
 
+struct PreformattedBlockView: View {
+    let text: String
+
+    private let maxFontSize: CGFloat = 12
+    private let charWidthRatio: CGFloat = 0.6 // Monospace char width ≈ 0.6 * font size
+    private let lineHeightRatio: CGFloat = 1.2
+
+    private var lines: [String] {
+        text.components(separatedBy: .newlines)
+    }
+
+    private var maxLineLength: Int {
+        lines.map { $0.count }.max() ?? 1
+    }
+
+    private func fontSize(for width: CGFloat) -> CGFloat {
+        let ideal = width / (CGFloat(maxLineLength) * charWidthRatio)
+        return min(ideal, maxFontSize)
+    }
+
+    private func blockHeight(fontSize: CGFloat) -> CGFloat {
+        CGFloat(lines.count) * fontSize * lineHeightRatio
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let size = fontSize(for: geometry.size.width)
+
+            Text(text)
+                .font(.system(size: size, design: .monospaced))
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: true, vertical: false)
+        }
+        .frame(height: blockHeight(fontSize: estimatedFontSize))
+    }
+
+    // Estimate based on typical screen width (~350pt usable)
+    private var estimatedFontSize: CGFloat {
+        fontSize(for: 350)
+    }
+}
+
 struct TitanContentView: View {
     let content: String
     let baseURL: String
@@ -78,13 +120,8 @@ struct TitanContentView: View {
                 .padding(.leading, 12)
 
         case .preformattedBlock(let text, _):
-            ScrollView(.horizontal, showsIndicators: false) {
-                Text(text)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: true, vertical: false)
-            }
-            .padding(.vertical, 4)
+            PreformattedBlockView(text: text)
+                .padding(.vertical, 4)
         }
     }
 }
