@@ -118,7 +118,7 @@ struct ContentView: View {
                                     navigateTo(urlText)
                                 }
                                 .padding(.horizontal, 12)
-                                .padding(.vertical, 10)
+                                .padding(.vertical, 12)
                                 .glassEffect(.regular, in: .capsule)
 
                             Menu {
