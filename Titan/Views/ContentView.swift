@@ -6,12 +6,14 @@
 import SwiftUI
 
 struct IndeterminateProgressBar: View {
+    let color: Color
+
     @State private var animationOffset: CGFloat = -1.0
 
     var body: some View {
         GeometryReader { geometry in
             Rectangle()
-                .fill(Color.orange)
+                .fill(color)
                 .frame(width: geometry.size.width * 0.3)
                 .offset(x: animationOffset * geometry.size.width)
         }
@@ -28,6 +30,7 @@ struct IndeterminateProgressBar: View {
 struct ContentView: View {
     private let homeSite = "gemini://geminiprotocol.net/"
 
+    @Environment(\.themeSettings) private var themeSettings
     @State private var urlText = ""
     @State private var responseText = ""
     @State private var isLoading = false
@@ -71,7 +74,7 @@ struct ContentView: View {
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 0) {
                     if isLoading {
-                        IndeterminateProgressBar()
+                        IndeterminateProgressBar(color: themeSettings.progressBarColor)
                     } else {
                         Color.clear
                             .frame(height: 3)
@@ -84,7 +87,7 @@ struct ContentView: View {
                                 Button(action: goBack) {
                                     Image(systemName: "chevron.left")
                                         .font(.title2)
-                                        .foregroundStyle(canGoBack && !isLoading ? .primary : .tertiary)
+                                        .foregroundStyle(canGoBack && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
                                         .frame(width: 44, height: 44)
                                 }
                                 .disabled(!canGoBack || isLoading)
@@ -95,7 +98,7 @@ struct ContentView: View {
                                 Button(action: goForward) {
                                     Image(systemName: "chevron.right")
                                         .font(.title2)
-                                        .foregroundStyle(canGoForward && !isLoading ? .primary : .tertiary)
+                                        .foregroundStyle(canGoForward && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
                                         .frame(width: 44, height: 44)
                                 }
                                 .disabled(!canGoForward || isLoading)
@@ -123,7 +126,7 @@ struct ContentView: View {
                             } label: {
                                 Image(systemName: "ellipsis.circle")
                                     .font(.title2)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(themeSettings.toolbarButtonColor)
                                     .frame(width: 44, height: 44)
                             }
                             .glassEffect(.regular.interactive())

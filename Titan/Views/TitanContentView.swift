@@ -52,6 +52,8 @@ struct TitanContentView: View {
     let baseURL: String
     let onLinkTap: (String) -> Void
 
+    @Environment(\.themeSettings) private var themeSettings
+
     init(content: String, baseURL: String = "", onLinkTap: @escaping (String) -> Void) {
         self.content = content
         self.baseURL = baseURL
@@ -84,7 +86,7 @@ struct TitanContentView: View {
                         .font(.system(size: 14, design: .monospaced))
                 }
             }
-            .foregroundColor(.orange)
+            .foregroundColor(themeSettings.linkColor)
             .padding(.vertical, 6)
 
         case .heading1(let text):

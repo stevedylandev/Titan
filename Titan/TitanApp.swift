@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct TitanApp: App {
+    @StateObject private var themeSettings = ThemeSettings()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.themeSettings, themeSettings)
         }
     }
 }

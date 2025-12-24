@@ -12,6 +12,7 @@ struct MediaPreviewView: View {
     let media: MediaContent
     let onDismiss: () -> Void
 
+    @Environment(\.themeSettings) private var themeSettings
     @State private var showingSaveOptions = false
     @State private var saveMessage: String?
     @State private var showingSaveAlert = false
@@ -38,14 +39,14 @@ struct MediaPreviewView: View {
                             Image(systemName: "chevron.left")
                             Text("Back")
                         }
-                        .foregroundColor(.orange)
+                        .foregroundColor(themeSettings.accentColor)
                     }
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingSaveOptions = true }) {
                         Image(systemName: "square.and.arrow.down")
-                            .foregroundColor(.orange)
+                            .foregroundColor(themeSettings.accentColor)
                     }
                 }
             }
@@ -174,13 +175,14 @@ struct AudioPreviewContent: View {
     let data: Data
     let filename: String
 
+    @Environment(\.themeSettings) private var themeSettings
     @StateObject private var audioPlayer = AudioPlayerViewModel()
 
     var body: some View {
         VStack(spacing: 32) {
             Image(systemName: "waveform.circle.fill")
                 .font(.system(size: 120))
-                .foregroundColor(.orange)
+                .foregroundColor(themeSettings.mediaAccentColor)
 
             Text(filename)
                 .font(.headline)
@@ -198,7 +200,7 @@ struct AudioPreviewContent: View {
                     ),
                     in: 0...max(audioPlayer.duration, 0.01)
                 )
-                .accentColor(.orange)
+                .accentColor(themeSettings.mediaAccentColor)
                 .padding(.horizontal, 32)
 
                 // Time labels
@@ -224,7 +226,7 @@ struct AudioPreviewContent: View {
                     Button(action: { audioPlayer.togglePlayPause() }) {
                         Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                             .font(.system(size: 64))
-                            .foregroundColor(.orange)
+                            .foregroundColor(themeSettings.mediaAccentColor)
                     }
 
                     Button(action: { audioPlayer.skipForward() }) {
