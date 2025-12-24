@@ -26,7 +26,9 @@ struct IndeterminateProgressBar: View {
 }
 
 struct ContentView: View {
-    @State private var urlText = "gemini://geminiprotocol.net/"
+    private let homeSite = "gemini://geminiprotocol.net/"
+
+    @State private var urlText = ""
     @State private var responseText = ""
     @State private var isLoading = false
 
@@ -105,6 +107,18 @@ struct ContentView: View {
                         .onSubmit {
                             navigateTo(urlText)
                         }
+
+                    Menu {
+                        Button {
+                            navigateTo(homeSite)
+                        } label: {
+                            Label("Home", systemImage: "house")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .font(.title2)
+                            .foregroundColor(.orange)
+                    }
                 }
                 .padding(.top, 8)
             }
@@ -112,7 +126,7 @@ struct ContentView: View {
             .padding(.bottom, 8)
         }
         .onAppear {
-            navigateTo(urlText)
+            navigateTo(homeSite)
         }
         .ignoresSafeArea(edges: .top)
         .alert("Input Required", isPresented: $showInputPrompt) {
