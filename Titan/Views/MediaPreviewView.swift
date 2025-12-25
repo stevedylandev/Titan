@@ -12,7 +12,7 @@ struct MediaPreviewView: View {
     let media: MediaContent
     let onDismiss: () -> Void
 
-    @Environment(\.themeSettings) private var themeSettings
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @State private var showingSaveOptions = false
     @State private var saveMessage: String?
     @State private var showingSaveAlert = false
@@ -175,7 +175,7 @@ struct AudioPreviewContent: View {
     let data: Data
     let filename: String
 
-    @Environment(\.themeSettings) private var themeSettings
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @StateObject private var audioPlayer = AudioPlayerViewModel()
 
     var body: some View {

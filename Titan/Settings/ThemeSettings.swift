@@ -26,6 +26,62 @@ class ThemeSettings: ObservableObject {
 
     /// The home page URL that the browser navigates to on launch and when pressing Home
     @AppStorage("homePage") var homePage: String = "gemini://geminiprotocol.net/"
+
+    /// Key for persisting accent color hex value
+    private static let accentColorKey = "accentColorHex"
+
+    init() {
+        if let hex = UserDefaults.standard.string(forKey: Self.accentColorKey),
+           let color = Color(hex: hex) {
+            setAllColors(color)
+        }
+    }
+
+    /// Sets all accent colors to the given color and persists the choice
+    func setAllColors(_ color: Color) {
+        accentColor = color
+        progressBarColor = color
+        linkColor = color
+        mediaAccentColor = color
+        toolbarButtonColor = color
+
+        if let hex = color.toHex() {
+            UserDefaults.standard.set(hex, forKey: Self.accentColorKey)
+        }
+    }
+}
+
+// MARK: - Color Hex Conversion
+
+extension Color {
+    init?(hex: String) {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        guard hexSanitized.count == 6 else { return nil }
+
+        var rgb: UInt64 = 0
+        guard Scanner(string: hexSanitized).scanHexInt64(&rgb) else { return nil }
+
+        let red = Double((rgb & 0xFF0000) >> 16) / 255.0
+        let green = Double((rgb & 0x00FF00) >> 8) / 255.0
+        let blue = Double(rgb & 0x0000FF) / 255.0
+
+        self.init(red: red, green: green, blue: blue)
+    }
+
+    func toHex() -> String? {
+        guard let components = UIColor(self).cgColor.components else { return nil }
+
+        let r = components.count > 0 ? components[0] : 0
+        let g = components.count > 1 ? components[1] : 0
+        let b = components.count > 2 ? components[2] : 0
+
+        return String(format: "#%02X%02X%02X",
+                      Int(r * 255),
+                      Int(g * 255),
+                      Int(b * 255))
+    }
 }
 
 // MARK: - Environment Key

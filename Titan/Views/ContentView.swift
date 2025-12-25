@@ -28,7 +28,7 @@ struct IndeterminateProgressBar: View {
 }
 
 struct ContentView: View {
-    @Environment(\.themeSettings) private var themeSettings
+    @EnvironmentObject private var themeSettings: ThemeSettings
     @State private var urlText = ""
     @State private var responseText = ""
     @State private var isLoading = false

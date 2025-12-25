@@ -15,6 +15,7 @@ struct TitanApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.themeSettings, themeSettings)
+                .environmentObject(themeSettings)
         }
     }
 }

@@ -52,7 +52,7 @@ struct TitanContentView: View {
     let baseURL: String
     let onLinkTap: (String) -> Void
 
-    @Environment(\.themeSettings) private var themeSettings
+    @EnvironmentObject private var themeSettings: ThemeSettings
 
     init(content: String, baseURL: String = "", onLinkTap: @escaping (String) -> Void) {
         self.content = content
