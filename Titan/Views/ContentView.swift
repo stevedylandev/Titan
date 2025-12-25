@@ -62,6 +62,9 @@ struct ContentView: View {
     // Settings
     @State private var showSettings = false
 
+    // URL input focus state
+    @FocusState private var isURLFocused: Bool
+
     private let maxRedirects = 5
 
     var body: some View {
@@ -92,88 +95,108 @@ struct ContentView: View {
                     GlassEffectContainer {
                         HStack(spacing: 12) {
                             // Navigation buttons in a single pill
-                            HStack(spacing: 0) {
-                                Button(action: goBack) {
-                                    Image(systemName: "chevron.left")
-                                        .font(.title2)
-                                        .foregroundStyle(canGoBack && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
-                                        .frame(width: 44, height: 44)
-                                }
-                                .disabled(!canGoBack || isLoading)
+                            if !isURLFocused {
+                                HStack(spacing: 0) {
+                                    Button(action: goBack) {
+                                        Image(systemName: "chevron.left")
+                                            .font(.title2)
+                                            .foregroundStyle(canGoBack && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
+                                            .frame(width: 44, height: 44)
+                                    }
+                                    .disabled(!canGoBack || isLoading)
 
-                                Divider()
-                                    .frame(height: 24)
+                                    Divider()
+                                        .frame(height: 24)
 
-                                Button(action: goForward) {
-                                    Image(systemName: "chevron.right")
-                                        .font(.title2)
-                                        .foregroundStyle(canGoForward && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
-                                        .frame(width: 44, height: 44)
+                                    Button(action: goForward) {
+                                        Image(systemName: "chevron.right")
+                                            .font(.title2)
+                                            .foregroundStyle(canGoForward && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
+                                            .frame(width: 44, height: 44)
+                                    }
+                                    .disabled(!canGoForward || isLoading)
                                 }
-                                .disabled(!canGoForward || isLoading)
+                                .glassEffect(.regular.interactive())
+                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
                             }
-                            .glassEffect(.regular.interactive())
 
                             TextField("Enter Gemini URL", text: $urlText)
+                                .focused($isURLFocused)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .keyboardType(.URL)
                                 .submitLabel(.go)
                                 .onSubmit {
+                                    isURLFocused = false
                                     navigateTo(urlText)
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 12)
                                 .glassEffect(.regular, in: .capsule)
 
-                            Menu {
-
+                            if isURLFocused {
                                 Button {
-                                    showSettings = true
+                                    isURLFocused = false
                                 } label: {
-                                    Label("Settings", systemImage: "gear")
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.title2)
+                                        .foregroundStyle(themeSettings.toolbarButtonColor)
+                                        .frame(width: 44, height: 44)
                                 }
-                                
-                                Divider()
+                                .glassEffect(.regular.interactive())
+                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                            } else {
+                                Menu {
 
-                                Button {
-                                    showBookmarks = true
-                                } label: {
-                                    Label("Bookmarks", systemImage: "book")
-                                }
-                                
-                                Button {
-                                    addCurrentPageToBookmarks()
-                                } label: {
-                                    if bookmarkManager.isBookmarked(url: urlText) {
-                                        Label("Bookmarked", systemImage: "bookmark.fill")
-                                    } else {
-                                        Label("Add Bookmark", systemImage: "bookmark")
+                                    Button {
+                                        showSettings = true
+                                    } label: {
+                                        Label("Settings", systemImage: "gear")
                                     }
-                                }
-                                .disabled(urlText.isEmpty || bookmarkManager.isBookmarked(url: urlText))
 
-                                Button {
-                                    showHistory = true
-                                } label: {
-                                    Label("History", systemImage: "clock")
-                                }
+                                    Divider()
 
-                                Divider()
-                                
-                                Button {
-                                    navigateTo(themeSettings.homePage)
+                                    Button {
+                                        showBookmarks = true
+                                    } label: {
+                                        Label("Bookmarks", systemImage: "book")
+                                    }
+
+                                    Button {
+                                        addCurrentPageToBookmarks()
+                                    } label: {
+                                        if bookmarkManager.isBookmarked(url: urlText) {
+                                            Label("Bookmarked", systemImage: "bookmark.fill")
+                                        } else {
+                                            Label("Add Bookmark", systemImage: "bookmark")
+                                        }
+                                    }
+                                    .disabled(urlText.isEmpty || bookmarkManager.isBookmarked(url: urlText))
+
+                                    Button {
+                                        showHistory = true
+                                    } label: {
+                                        Label("History", systemImage: "clock")
+                                    }
+
+                                    Divider()
+
+                                    Button {
+                                        navigateTo(themeSettings.homePage)
+                                    } label: {
+                                        Label("Home", systemImage: "house")
+                                    }
                                 } label: {
-                                    Label("Home", systemImage: "house")
+                                    Image(systemName: "ellipsis.circle")
+                                        .font(.title2)
+                                        .foregroundStyle(themeSettings.toolbarButtonColor)
+                                        .frame(width: 44, height: 44)
                                 }
-                            } label: {
-                                Image(systemName: "ellipsis.circle")
-                                    .font(.title2)
-                                    .foregroundStyle(themeSettings.toolbarButtonColor)
-                                    .frame(width: 44, height: 44)
+                                .glassEffect(.regular.interactive())
+                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
                             }
-                            .glassEffect(.regular.interactive())
                         }
+                        .animation(.easeInOut(duration: 0.25), value: isURLFocused)
                     }
                     .padding(.top, 8)
                 }
