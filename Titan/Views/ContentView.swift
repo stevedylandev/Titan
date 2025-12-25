@@ -62,6 +62,10 @@ struct ContentView: View {
     // Settings
     @State private var showSettings = false
 
+    // Tabs
+    @State private var tabManager = TabManager()
+    @State private var showTabs = false
+
     // URL input focus state
     @FocusState private var isURLFocused: Bool
 
@@ -147,6 +151,30 @@ struct ContentView: View {
                                 .transition(.opacity.combined(with: .scale(scale: 0.8)))
                             } else {
                                 Menu {
+                                    Button {
+                                        showTabs = true
+                                    } label: {
+                                        Label("Tabs (\(tabManager.tabs.count))", systemImage: "square.on.square")
+                                    }
+
+                                    Button {
+                                        saveCurrentTabState()
+                                        tabManager.createTab(url: themeSettings.homePage)
+                                        loadActiveTabState()
+                                        navigateTo(themeSettings.homePage)
+                                    } label: {
+                                        Label("New Tab", systemImage: "plus")
+                                    }
+
+                                    Button {
+                                        tabManager.closeTab(id: tabManager.activeTabId)
+                                        loadActiveTabState()
+                                    } label: {
+                                        Label("Close Tab", systemImage: "xmark")
+                                    }
+                                    .disabled(tabManager.tabs.count <= 1)
+
+                                    Divider()
 
                                     Button {
                                         showSettings = true
@@ -205,7 +233,14 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            navigateTo(themeSettings.homePage)
+            loadActiveTabState()
+            // If this is a fresh tab with no content, navigate to home
+            if urlText.isEmpty {
+                navigateTo(themeSettings.homePage)
+            } else if responseText.isEmpty && !urlText.isEmpty {
+                // Tab has URL but no content (restored from persistence)
+                navigateTo(urlText)
+            }
         }
         .alert("Input Required", isPresented: $showInputPrompt) {
             if inputIsSensitive {
@@ -245,6 +280,35 @@ struct ContentView: View {
                 navigateTo(item.url)
             }
         }
+        .sheet(isPresented: $showTabs) {
+            TabsListView(tabManager: tabManager) { tab in
+                showTabs = false
+                saveCurrentTabState()
+                tabManager.switchTo(id: tab.id)
+                loadActiveTabState()
+            }
+        }
+    }
+
+    // MARK: - Tab State Management
+
+    private func saveCurrentTabState() {
+        let title = extractPageTitle() ?? urlText
+        tabManager.updateActiveTab(
+            url: urlText,
+            title: title,
+            responseText: responseText,
+            history: history,
+            historyIndex: historyIndex
+        )
+    }
+
+    private func loadActiveTabState() {
+        guard let tab = tabManager.activeTab else { return }
+        urlText = tab.url
+        responseText = tab.responseText
+        history = tab.history
+        historyIndex = tab.historyIndex
     }
 
     private func submitInput() {
@@ -363,6 +427,8 @@ struct ContentView: View {
                             let title = extractPageTitle() ?? finalURL
                             historyManager.addToHistory(url: finalURL, title: title)
                         }
+                        // Save tab state
+                        saveCurrentTabState()
                     }
                 case .input:
                     pendingInputURL = finalURL
