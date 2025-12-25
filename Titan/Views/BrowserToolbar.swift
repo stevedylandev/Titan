@@ -1,0 +1,193 @@
+//
+//  BrowserToolbar.swift
+//  Titan
+//
+
+import SwiftUI
+
+struct BrowserToolbar: View {
+    @EnvironmentObject private var themeSettings: ThemeSettings
+
+    // State bindings
+    @Binding var urlText: String
+    var isURLFocused: FocusState<Bool>.Binding
+    let isLoading: Bool
+    let canGoBack: Bool
+    let canGoForward: Bool
+    let tabCount: Int
+    let isBookmarked: Bool
+    let canCloseTab: Bool
+
+    // Callbacks
+    let onBack: () -> Void
+    let onForward: () -> Void
+    let onSubmitURL: () -> Void
+    let onDismissKeyboard: () -> Void
+    let onShowTabs: () -> Void
+    let onNewTab: () -> Void
+    let onCloseTab: () -> Void
+    let onShowSettings: () -> Void
+    let onShowBookmarks: () -> Void
+    let onAddBookmark: () -> Void
+    let onShowHistory: () -> Void
+    let onGoHome: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if isLoading {
+                IndeterminateProgressBar(color: themeSettings.progressBarColor)
+            } else {
+                Color.clear
+                    .frame(height: 3)
+            }
+
+            GlassEffectContainer {
+                HStack(spacing: 12) {
+                    // Navigation buttons in a single pill
+                    if !isURLFocused.wrappedValue {
+                        navigationButtons
+                    }
+
+                    urlTextField
+
+                    if isURLFocused.wrappedValue {
+                        dismissButton
+                    } else {
+                        menuButton
+                    }
+                }
+                .animation(.easeInOut(duration: 0.25), value: isURLFocused.wrappedValue)
+            }
+            .padding(.top, 8)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
+    }
+
+    // MARK: - Subviews
+
+    private var navigationButtons: some View {
+        HStack(spacing: 0) {
+            Button(action: onBack) {
+                Image(systemName: "chevron.left")
+                    .font(.title2)
+                    .foregroundStyle(canGoBack && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
+                    .frame(width: 44, height: 44)
+            }
+            .disabled(!canGoBack || isLoading)
+
+            Divider()
+                .frame(height: 24)
+
+            Button(action: onForward) {
+                Image(systemName: "chevron.right")
+                    .font(.title2)
+                    .foregroundStyle(canGoForward && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
+                    .frame(width: 44, height: 44)
+            }
+            .disabled(!canGoForward || isLoading)
+        }
+        .glassEffect(.regular.interactive())
+        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+    }
+
+    private var urlTextField: some View {
+        TextField("Enter Gemini URL", text: $urlText)
+            .focused(isURLFocused)
+            .autocapitalization(.none)
+            .disableAutocorrection(true)
+            .keyboardType(.URL)
+            .submitLabel(.go)
+            .onSubmit {
+                isURLFocused.wrappedValue = false
+                onSubmitURL()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .glassEffect(.regular, in: .capsule)
+    }
+
+    private var dismissButton: some View {
+        Button {
+            isURLFocused.wrappedValue = false
+        } label: {
+            Image(systemName: "xmark.circle.fill")
+                .font(.title2)
+                .foregroundStyle(themeSettings.toolbarButtonColor)
+                .frame(width: 44, height: 44)
+        }
+        .glassEffect(.regular.interactive())
+        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+    }
+
+    private var menuButton: some View {
+        Menu {
+            Button {
+                onShowTabs()
+            } label: {
+                Label("Tabs (\(tabCount))", systemImage: "square.on.square")
+            }
+
+            Button {
+                onNewTab()
+            } label: {
+                Label("New Tab", systemImage: "plus")
+            }
+
+            Button {
+                onCloseTab()
+            } label: {
+                Label("Close Tab", systemImage: "xmark")
+            }
+            .disabled(!canCloseTab)
+
+            Divider()
+
+            Button {
+                onShowSettings()
+            } label: {
+                Label("Settings", systemImage: "gear")
+            }
+
+            Divider()
+
+            Button {
+                onShowBookmarks()
+            } label: {
+                Label("Bookmarks", systemImage: "book")
+            }
+
+            Button {
+                onAddBookmark()
+            } label: {
+                if isBookmarked {
+                    Label("Bookmarked", systemImage: "bookmark.fill")
+                } else {
+                    Label("Add Bookmark", systemImage: "bookmark")
+                }
+            }
+            .disabled(urlText.isEmpty || isBookmarked)
+
+            Button {
+                onShowHistory()
+            } label: {
+                Label("History", systemImage: "clock")
+            }
+
+            Divider()
+
+            Button {
+                onGoHome()
+            } label: {
+                Label("Home", systemImage: "house")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.title2)
+                .foregroundStyle(themeSettings.toolbarButtonColor)
+                .frame(width: 44, height: 44)
+        }
+        .glassEffect(.regular.interactive())
+        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+    }
+}

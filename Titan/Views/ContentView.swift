@@ -5,28 +5,6 @@
 
 import SwiftUI
 
-struct IndeterminateProgressBar: View {
-    let color: Color
-
-    @State private var animationOffset: CGFloat = -1.0
-
-    var body: some View {
-        GeometryReader { geometry in
-            Rectangle()
-                .fill(color)
-                .frame(width: geometry.size.width * 0.3)
-                .offset(x: animationOffset * geometry.size.width)
-        }
-        .frame(height: 3)
-        .clipped()
-        .onAppear {
-            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                animationOffset = 1.0
-            }
-        }
-    }
-}
-
 struct ContentView: View {
     @EnvironmentObject private var themeSettings: ThemeSettings
     @State private var urlText = ""
@@ -88,148 +66,36 @@ struct ContentView: View {
             }
             .contentMargins(.top, 20, for: .scrollContent)
             .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 0) {
-                    if isLoading {
-                        IndeterminateProgressBar(color: themeSettings.progressBarColor)
-                    } else {
-                        Color.clear
-                            .frame(height: 3)
-                    }
-
-                    GlassEffectContainer {
-                        HStack(spacing: 12) {
-                            // Navigation buttons in a single pill
-                            if !isURLFocused {
-                                HStack(spacing: 0) {
-                                    Button(action: goBack) {
-                                        Image(systemName: "chevron.left")
-                                            .font(.title2)
-                                            .foregroundStyle(canGoBack && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
-                                            .frame(width: 44, height: 44)
-                                    }
-                                    .disabled(!canGoBack || isLoading)
-
-                                    Divider()
-                                        .frame(height: 24)
-
-                                    Button(action: goForward) {
-                                        Image(systemName: "chevron.right")
-                                            .font(.title2)
-                                            .foregroundStyle(canGoForward && !isLoading ? themeSettings.toolbarButtonColor : themeSettings.toolbarButtonColor.opacity(0.3))
-                                            .frame(width: 44, height: 44)
-                                    }
-                                    .disabled(!canGoForward || isLoading)
-                                }
-                                .glassEffect(.regular.interactive())
-                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
-                            }
-
-                            TextField("Enter Gemini URL", text: $urlText)
-                                .focused($isURLFocused)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                                .keyboardType(.URL)
-                                .submitLabel(.go)
-                                .onSubmit {
-                                    isURLFocused = false
-                                    navigateTo(urlText)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 12)
-                                .glassEffect(.regular, in: .capsule)
-
-                            if isURLFocused {
-                                Button {
-                                    isURLFocused = false
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.title2)
-                                        .foregroundStyle(themeSettings.toolbarButtonColor)
-                                        .frame(width: 44, height: 44)
-                                }
-                                .glassEffect(.regular.interactive())
-                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
-                            } else {
-                                Menu {
-                                    Button {
-                                        showTabs = true
-                                    } label: {
-                                        Label("Tabs (\(tabManager.tabs.count))", systemImage: "square.on.square")
-                                    }
-
-                                    Button {
-                                        saveCurrentTabState()
-                                        tabManager.createTab(url: themeSettings.homePage)
-                                        loadActiveTabState()
-                                        navigateTo(themeSettings.homePage)
-                                    } label: {
-                                        Label("New Tab", systemImage: "plus")
-                                    }
-
-                                    Button {
-                                        tabManager.closeTab(id: tabManager.activeTabId)
-                                        loadActiveTabState()
-                                    } label: {
-                                        Label("Close Tab", systemImage: "xmark")
-                                    }
-                                    .disabled(tabManager.tabs.count <= 1)
-
-                                    Divider()
-
-                                    Button {
-                                        showSettings = true
-                                    } label: {
-                                        Label("Settings", systemImage: "gear")
-                                    }
-
-                                    Divider()
-
-                                    Button {
-                                        showBookmarks = true
-                                    } label: {
-                                        Label("Bookmarks", systemImage: "book")
-                                    }
-
-                                    Button {
-                                        addCurrentPageToBookmarks()
-                                    } label: {
-                                        if bookmarkManager.isBookmarked(url: urlText) {
-                                            Label("Bookmarked", systemImage: "bookmark.fill")
-                                        } else {
-                                            Label("Add Bookmark", systemImage: "bookmark")
-                                        }
-                                    }
-                                    .disabled(urlText.isEmpty || bookmarkManager.isBookmarked(url: urlText))
-
-                                    Button {
-                                        showHistory = true
-                                    } label: {
-                                        Label("History", systemImage: "clock")
-                                    }
-
-                                    Divider()
-
-                                    Button {
-                                        navigateTo(themeSettings.homePage)
-                                    } label: {
-                                        Label("Home", systemImage: "house")
-                                    }
-                                } label: {
-                                    Image(systemName: "ellipsis.circle")
-                                        .font(.title2)
-                                        .foregroundStyle(themeSettings.toolbarButtonColor)
-                                        .frame(width: 44, height: 44)
-                                }
-                                .glassEffect(.regular.interactive())
-                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
-                            }
-                        }
-                        .animation(.easeInOut(duration: 0.25), value: isURLFocused)
-                    }
-                    .padding(.top, 8)
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
+                BrowserToolbar(
+                    urlText: $urlText,
+                    isURLFocused: $isURLFocused,
+                    isLoading: isLoading,
+                    canGoBack: canGoBack,
+                    canGoForward: canGoForward,
+                    tabCount: tabManager.tabs.count,
+                    isBookmarked: bookmarkManager.isBookmarked(url: urlText),
+                    canCloseTab: tabManager.tabs.count > 1,
+                    onBack: goBack,
+                    onForward: goForward,
+                    onSubmitURL: { navigateTo(urlText) },
+                    onDismissKeyboard: { isURLFocused = false },
+                    onShowTabs: { showTabs = true },
+                    onNewTab: {
+                        saveCurrentTabState()
+                        tabManager.createTab(url: themeSettings.homePage)
+                        loadActiveTabState()
+                        navigateTo(themeSettings.homePage)
+                    },
+                    onCloseTab: {
+                        tabManager.closeTab(id: tabManager.activeTabId)
+                        loadActiveTabState()
+                    },
+                    onShowSettings: { showSettings = true },
+                    onShowBookmarks: { showBookmarks = true },
+                    onAddBookmark: addCurrentPageToBookmarks,
+                    onShowHistory: { showHistory = true },
+                    onGoHome: { navigateTo(themeSettings.homePage) }
+                )
             }
         }
         .onAppear {
