@@ -55,6 +55,10 @@ struct ContentView: View {
     @State private var bookmarkManager = BookmarkManager()
     @State private var showBookmarks = false
 
+    // History
+    @State private var historyManager = HistoryManager()
+    @State private var showHistory = false
+
     // Settings
     @State private var showSettings = false
 
@@ -149,6 +153,12 @@ struct ContentView: View {
                                 }
                                 .disabled(urlText.isEmpty || bookmarkManager.isBookmarked(url: urlText))
 
+                                Button {
+                                    showHistory = true
+                                } label: {
+                                    Label("History", systemImage: "clock")
+                                }
+
                                 Divider()
                                 
                                 Button {
@@ -205,6 +215,12 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
+        }
+        .sheet(isPresented: $showHistory) {
+            HistoryListView(historyManager: historyManager) { item in
+                showHistory = false
+                navigateTo(item.url)
+            }
         }
     }
 
@@ -319,6 +335,10 @@ struct ContentView: View {
                         if addToHistory {
                             history.append(finalURL)
                             historyIndex = history.count - 1
+
+                            // Add to persistent history
+                            let title = extractPageTitle() ?? finalURL
+                            historyManager.addToHistory(url: finalURL, title: title)
                         }
                     }
                 case .input:
