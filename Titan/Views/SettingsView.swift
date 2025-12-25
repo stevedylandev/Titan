@@ -11,6 +11,8 @@ struct SettingsView: View {
 
     @State private var homePageText: String = ""
     @State private var selectedAccentColor: Color = .blue
+    @State private var selectedBackgroundColor: Color = Color(UIColor.systemBackground)
+    @State private var selectedTextColor: Color = Color(UIColor.label)
 
     var body: some View {
         NavigationStack {
@@ -28,10 +30,12 @@ struct SettingsView: View {
 
                 Section {
                     ColorPicker("Accent Color", selection: $selectedAccentColor, supportsOpacity: false)
+                    ColorPicker("Background Color", selection: $selectedBackgroundColor, supportsOpacity: false)
+                    ColorPicker("Text Color", selection: $selectedTextColor, supportsOpacity: false)
                 } header: {
                     Text("Appearance")
                 } footer: {
-                    Text("Changes the color of links, buttons, and other interactive elements.")
+                    Text("Customize the colors of your browser interface.")
                 }
             }
             .navigationTitle("Settings")
@@ -45,7 +49,9 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         themeSettings.homePage = homePageText
-                        themeSettings.setAllColors(selectedAccentColor)
+                        themeSettings.setAllAccentColors(selectedAccentColor)
+                        themeSettings.setBackgroundColor(selectedBackgroundColor)
+                        themeSettings.setTextColor(selectedTextColor)
                         dismiss()
                     }
                 }
@@ -53,6 +59,8 @@ struct SettingsView: View {
             .onAppear {
                 homePageText = themeSettings.homePage
                 selectedAccentColor = themeSettings.accentColor
+                selectedBackgroundColor = themeSettings.backgroundColor
+                selectedTextColor = themeSettings.textColor
             }
         }
     }

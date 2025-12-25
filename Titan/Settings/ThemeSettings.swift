@@ -24,21 +24,37 @@ class ThemeSettings: ObservableObject {
     /// The color used for toolbar buttons (navigation, menu, etc.)
     @Published var toolbarButtonColor: Color = .blue
 
+    /// The background color for the main content area
+    @Published var backgroundColor: Color = Color(UIColor.systemBackground)
+
+    /// The text color for content
+    @Published var textColor: Color = Color(UIColor.label)
+
     /// The home page URL that the browser navigates to on launch and when pressing Home
     @AppStorage("homePage") var homePage: String = "gemini://geminiprotocol.net/"
 
     /// Key for persisting accent color hex value
     private static let accentColorKey = "accentColorHex"
+    private static let backgroundColorKey = "backgroundColorHex"
+    private static let textColorKey = "textColorHex"
 
     init() {
         if let hex = UserDefaults.standard.string(forKey: Self.accentColorKey),
            let color = Color(hex: hex) {
-            setAllColors(color)
+            setAllAccentColors(color)
+        }
+        if let hex = UserDefaults.standard.string(forKey: Self.backgroundColorKey),
+           let color = Color(hex: hex) {
+            backgroundColor = color
+        }
+        if let hex = UserDefaults.standard.string(forKey: Self.textColorKey),
+           let color = Color(hex: hex) {
+            textColor = color
         }
     }
 
     /// Sets all accent colors to the given color and persists the choice
-    func setAllColors(_ color: Color) {
+    func setAllAccentColors(_ color: Color) {
         accentColor = color
         progressBarColor = color
         linkColor = color
@@ -47,6 +63,22 @@ class ThemeSettings: ObservableObject {
 
         if let hex = color.toHex() {
             UserDefaults.standard.set(hex, forKey: Self.accentColorKey)
+        }
+    }
+
+    /// Sets the background color and persists the choice
+    func setBackgroundColor(_ color: Color) {
+        backgroundColor = color
+        if let hex = color.toHex() {
+            UserDefaults.standard.set(hex, forKey: Self.backgroundColorKey)
+        }
+    }
+
+    /// Sets the text color and persists the choice
+    func setTextColor(_ color: Color) {
+        textColor = color
+        if let hex = color.toHex() {
+            UserDefaults.standard.set(hex, forKey: Self.textColorKey)
         }
     }
 }

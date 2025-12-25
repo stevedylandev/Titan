@@ -77,6 +77,7 @@ struct TitanContentView: View {
         case .text(let text):
             Text(text)
                 .font(.system(.body, design: .monospaced))
+                .foregroundColor(themeSettings.textColor)
 
         case .link(let url, let label):
             Button(action: { onLinkTap(url) }) {
@@ -93,18 +94,21 @@ struct TitanContentView: View {
             Text(text)
                 .font(.system(.title, design: .monospaced))
                 .fontWeight(.bold)
+                .foregroundColor(themeSettings.textColor)
                 .padding(.top, 8)
 
         case .heading2(let text):
             Text(text)
                 .font(.system(.title2, design: .monospaced))
                 .fontWeight(.semibold)
+                .foregroundColor(themeSettings.textColor)
                 .padding(.top, 6)
 
         case .heading3(let text):
             Text(text)
                 .font(.system(.title3, design: .monospaced))
                 .fontWeight(.medium)
+                .foregroundColor(themeSettings.textColor)
                 .padding(.top, 4)
 
         case .listItem(let text):
@@ -113,6 +117,7 @@ struct TitanContentView: View {
                 Text(text)
             }
             .font(.system(.body, design: .monospaced))
+            .foregroundColor(themeSettings.textColor)
 
         case .quote(let text):
             Text(text)

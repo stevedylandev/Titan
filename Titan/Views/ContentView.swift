@@ -65,6 +65,7 @@ struct ContentView: View {
                 }
             }
             .contentMargins(.top, 20, for: .scrollContent)
+            .background(themeSettings.backgroundColor)
             .safeAreaInset(edge: .bottom) {
                 BrowserToolbar(
                     urlText: $urlText,
