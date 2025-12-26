@@ -59,6 +59,15 @@ struct TabsListView: View {
                     }
                 }
 
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        let newTab = tabManager.createTab()
+                        onSelect(newTab)
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+
                 if tabManager.tabs.count > 1 {
                     ToolbarItem(placement: .primaryAction) {
                         EditButton()
