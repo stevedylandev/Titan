@@ -372,4 +372,5 @@ struct UnsupportedContent: View {
         ),
         onDismiss: {}
     )
+    .environmentObject(ThemeSettings())
 }
