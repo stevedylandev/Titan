@@ -10,6 +10,7 @@ struct HistoryListView: View {
     let onSelect: (HistoryItem) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themeSettings) private var themeSettings
     @State private var showClearConfirmation = false
 
     private var groupedHistory: [(String, [HistoryItem])] {
@@ -60,21 +61,21 @@ struct HistoryListView: View {
                                     } label: {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(item.title)
-                                                .font(.system(.body, design: .monospaced))
-                                                .foregroundStyle(.primary)
+                                                .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
+                                                .foregroundStyle(themeSettings.textColor)
                                                 .lineLimit(2)
 
                                             HStack {
                                                 Text(item.url)
-                                                    .font(.system(.caption, design: .monospaced))
-                                                    .foregroundStyle(.secondary)
+                                                    .font(.system(.caption, design: themeSettings.fontDesign.fontDesign))
+                                                    .foregroundStyle(themeSettings.textColor.opacity(0.7))
                                                     .lineLimit(1)
 
                                                 Spacer()
 
                                                 Text(item.visitedAt, style: .time)
-                                                    .font(.system(.caption2, design: .monospaced))
-                                                    .foregroundStyle(.tertiary)
+                                                    .font(.system(.caption2, design: themeSettings.fontDesign.fontDesign))
+                                                    .foregroundStyle(themeSettings.textColor.opacity(0.5))
                                             }
                                         }
                                         .padding(.vertical, 4)

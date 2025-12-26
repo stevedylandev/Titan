@@ -10,6 +10,7 @@ struct BookmarksListView: View {
     let onSelect: (Bookmark) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themeSettings) private var themeSettings
 
     var body: some View {
         NavigationStack {
@@ -28,13 +29,13 @@ struct BookmarksListView: View {
                             } label: {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(bookmark.title)
-                                        .font(.system(.body, design: .monospaced))
-                                        .foregroundStyle(.primary)
+                                        .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
+                                        .foregroundStyle(themeSettings.textColor)
                                         .lineLimit(2)
 
                                     Text(bookmark.url)
-                                        .font(.system(.caption, design: .monospaced))
-                                        .foregroundStyle(.secondary)
+                                        .font(.system(.caption, design: themeSettings.fontDesign.fontDesign))
+                                        .foregroundStyle(themeSettings.textColor.opacity(0.7))
                                         .lineLimit(1)
                                 }
                                 .padding(.vertical, 4)

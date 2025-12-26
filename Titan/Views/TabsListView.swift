@@ -10,6 +10,7 @@ struct TabsListView: View {
     let onSelect: (Tab) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themeSettings) private var themeSettings
 
     var body: some View {
         NavigationStack {
@@ -21,14 +22,14 @@ struct TabsListView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(tab.title.isEmpty ? (tab.url.isEmpty ? "New Tab" : tab.url) : tab.title)
-                                    .font(.system(.body, design: .monospaced))
-                                    .foregroundStyle(.primary)
+                                    .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
+                                    .foregroundStyle(themeSettings.textColor)
                                     .lineLimit(2)
 
                                 if !tab.url.isEmpty && !tab.title.isEmpty {
                                     Text(tab.url)
-                                        .font(.system(.caption, design: .monospaced))
-                                        .foregroundStyle(.secondary)
+                                        .font(.system(.caption, design: themeSettings.fontDesign.fontDesign))
+                                        .foregroundStyle(themeSettings.textColor.opacity(0.7))
                                         .lineLimit(1)
                                 }
                             }
