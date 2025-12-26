@@ -14,7 +14,6 @@ struct SettingsView: View {
     @State private var selectedBackgroundColor: Color = Color(UIColor.systemBackground)
     @State private var selectedTextColor: Color = Color(UIColor.label)
     @State private var selectedFontDesign: FontDesignOption = .monospaced
-    @State private var selectedFontSize: Double = 16
 
     var body: some View {
         NavigationStack {
@@ -39,15 +38,6 @@ struct SettingsView: View {
                             Text(option.rawValue).tag(option)
                         }
                     }
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text("Font Size")
-                            Spacer()
-                            Text("\(Int(selectedFontSize))pt")
-                                .foregroundColor(.secondary)
-                        }
-                        Slider(value: $selectedFontSize, in: 12...24, step: 1)
-                    }
                 } header: {
                     Text("Appearance")
                 } footer: {
@@ -69,7 +59,6 @@ struct SettingsView: View {
                         themeSettings.setBackgroundColor(selectedBackgroundColor)
                         themeSettings.setTextColor(selectedTextColor)
                         themeSettings.setFontDesign(selectedFontDesign)
-                        themeSettings.setBaseFontSize(CGFloat(selectedFontSize))
                         dismiss()
                     }
                 }
@@ -80,7 +69,6 @@ struct SettingsView: View {
                 selectedBackgroundColor = themeSettings.backgroundColor
                 selectedTextColor = themeSettings.textColor
                 selectedFontDesign = themeSettings.fontDesign
-                selectedFontSize = Double(themeSettings.baseFontSize)
             }
         }
     }

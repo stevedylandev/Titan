@@ -7,9 +7,8 @@ import SwiftUI
 
 struct PreformattedBlockView: View {
     let text: String
-    let baseFontSize: CGFloat
 
-    private var maxFontSize: CGFloat { baseFontSize * 0.75 }
+    private let maxFontSize: CGFloat = 12
     private let charWidthRatio: CGFloat = 0.6 // Monospace char width ≈ 0.6 * font size
     private let lineHeightRatio: CGFloat = 1.2
 
@@ -72,17 +71,12 @@ struct TitanContentView: View {
         .padding(8)
     }
 
-    private var fontSize: CGFloat { themeSettings.baseFontSize }
-    private var heading1Size: CGFloat { fontSize * 1.75 }
-    private var heading2Size: CGFloat { fontSize * 1.5 }
-    private var heading3Size: CGFloat { fontSize * 1.25 }
-
     @ViewBuilder
     private func lineView(for line: TitanLine) -> some View {
         switch line {
         case .text(let text):
             Text(text)
-                .font(.system(size: fontSize, design: themeSettings.fontDesign.fontDesign))
+                .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
                 .foregroundColor(themeSettings.textColor)
 
         case .link(let url, let label):
@@ -90,7 +84,7 @@ struct TitanContentView: View {
                 HStack(alignment:.top, spacing: 4) {
                     Text(label)
                         .multilineTextAlignment(.leading)
-                        .font(.system(size: fontSize, design: themeSettings.fontDesign.fontDesign))
+                        .font(.system(size: 14, design: themeSettings.fontDesign.fontDesign))
                 }
             }
             .foregroundColor(themeSettings.linkColor)
@@ -98,21 +92,21 @@ struct TitanContentView: View {
 
         case .heading1(let text):
             Text(text)
-                .font(.system(size: heading1Size, design: themeSettings.fontDesign.fontDesign))
+                .font(.system(.title, design: themeSettings.fontDesign.fontDesign))
                 .fontWeight(.bold)
                 .foregroundColor(themeSettings.textColor)
                 .padding(.top, 8)
 
         case .heading2(let text):
             Text(text)
-                .font(.system(size: heading2Size, design: themeSettings.fontDesign.fontDesign))
+                .font(.system(.title2, design: themeSettings.fontDesign.fontDesign))
                 .fontWeight(.semibold)
                 .foregroundColor(themeSettings.textColor)
                 .padding(.top, 6)
 
         case .heading3(let text):
             Text(text)
-                .font(.system(size: heading3Size, design: themeSettings.fontDesign.fontDesign))
+                .font(.system(.title3, design: themeSettings.fontDesign.fontDesign))
                 .fontWeight(.medium)
                 .foregroundColor(themeSettings.textColor)
                 .padding(.top, 4)
@@ -122,18 +116,18 @@ struct TitanContentView: View {
                 Text("\u{2022}")
                 Text(text)
             }
-            .font(.system(size: fontSize, design: themeSettings.fontDesign.fontDesign))
+            .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
             .foregroundColor(themeSettings.textColor)
 
         case .quote(let text):
             Text(text)
-                .font(.system(size: fontSize, design: themeSettings.fontDesign.fontDesign))
+                .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
                 .italic()
                 .foregroundColor(.secondary)
                 .padding(.leading, 12)
 
         case .preformattedBlock(let text, _):
-            PreformattedBlockView(text: text, baseFontSize: fontSize)
+            PreformattedBlockView(text: text)
                 .padding(.vertical, 4)
         }
     }

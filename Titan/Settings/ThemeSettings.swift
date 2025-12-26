@@ -52,18 +52,14 @@ class ThemeSettings: ObservableObject {
     /// The font design for content
     @Published var fontDesign: FontDesignOption = .monospaced
 
-    /// The base font size for content (default 16pt)
-    @Published var baseFontSize: CGFloat = 16
-
     /// The home page URL that the browser navigates to on launch and when pressing Home
     @AppStorage("homePage") var homePage: String = "gemini://geminiprotocol.net/"
 
     /// Key for persisting accent color hex value
     private static let accentColorKey = "accentColorHex"
-    private static let backgroundColorKey = "backgroundColorHex"
+    private static let backgroundColorKey = "backgroundColorKey"
     private static let textColorKey = "textColorHex"
     private static let fontDesignKey = "fontDesign"
-    private static let baseFontSizeKey = "baseFontSize"
 
     init() {
         if let hex = UserDefaults.standard.string(forKey: Self.accentColorKey),
@@ -81,10 +77,6 @@ class ThemeSettings: ObservableObject {
         if let fontRaw = UserDefaults.standard.string(forKey: Self.fontDesignKey),
            let font = FontDesignOption(rawValue: fontRaw) {
             fontDesign = font
-        }
-        let savedFontSize = UserDefaults.standard.double(forKey: Self.baseFontSizeKey)
-        if savedFontSize > 0 {
-            baseFontSize = savedFontSize
         }
     }
 
@@ -121,12 +113,6 @@ class ThemeSettings: ObservableObject {
     func setFontDesign(_ font: FontDesignOption) {
         fontDesign = font
         UserDefaults.standard.set(font.rawValue, forKey: Self.fontDesignKey)
-    }
-
-    /// Sets the base font size and persists the choice
-    func setBaseFontSize(_ size: CGFloat) {
-        baseFontSize = size
-        UserDefaults.standard.set(Double(size), forKey: Self.baseFontSizeKey)
     }
 }
 
