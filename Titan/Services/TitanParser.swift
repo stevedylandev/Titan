@@ -66,7 +66,7 @@ struct TitanParser {
         let components = trimmed.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
 
         let rawURL = components.first ?? ""
-        let label = components.count > 1 ? components.dropFirst().joined(separator: " ") : rawURL
+        let baseLabel = components.count > 1 ? components.dropFirst().joined(separator: " ") : rawURL
 
         let resolvedURL: String
         if rawURL.contains("://") {
@@ -78,6 +78,32 @@ struct TitanParser {
             resolvedURL = rawURL
         }
 
+        // Add scheme prefix for non-gemini links
+        let label = schemePrefix(for: resolvedURL) + baseLabel
+
         return (resolvedURL, label)
+    }
+
+    private static func schemePrefix(for url: String) -> String {
+        guard let parsed = URL(string: url), let scheme = parsed.scheme?.lowercased() else {
+            return ""
+        }
+
+        switch scheme {
+        case "gemini":
+            return ""
+        case "http", "https":
+            return "[http] "
+        case "file":
+            return "[file] "
+        case "gopher":
+            return "[gopher] "
+        case "mailto":
+            return "[mail] "
+        case "finger":
+            return "[finger] "
+        default:
+            return "[\(scheme)] "
+        }
     }
 }
