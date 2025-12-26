@@ -122,27 +122,35 @@ struct BrowserToolbar: View {
 
     private var menuButton: some View {
         Menu {
-            Button {
-                onShowTabs()
-            } label: {
-                Label("Tabs (\(tabCount))", systemImage: "square.on.square")
-            }
-
+            // New Tab
             Button {
                 onNewTab()
             } label: {
                 Label("New Tab", systemImage: "plus")
             }
-
+            
+            // Add to Bookmarks
             Button {
-                onCloseTab()
+                onAddBookmark()
             } label: {
-                Label("Close Tab", systemImage: "xmark")
+                if isBookmarked {
+                    Label("Bookmarked", systemImage: "bookmark.fill")
+                } else {
+                    Label("Add to Bookmarks", systemImage: "bookmark")
+                }
             }
-            .disabled(!canCloseTab)
+            .disabled(urlText.isEmpty || isBookmarked)
 
             Divider()
 
+            // History
+            Button {
+                onShowHistory()
+            } label: {
+                Label("History", systemImage: "clock")
+            }
+
+            // Settings
             Button {
                 onShowSettings()
             } label: {
@@ -151,42 +159,28 @@ struct BrowserToolbar: View {
 
             Divider()
 
-            Button {
-                onShowBookmarks()
-            } label: {
-                Label("Bookmarks", systemImage: "book")
-            }
+            // Bottom section: Bookmarks | Tabs as large square buttons with labels
+            ControlGroup {
+                Button {
+                    onShowBookmarks()
+                } label: {
+                    Label("Bookmarks", systemImage: "book")
+                }
 
-            Button {
-                onAddBookmark()
-            } label: {
-                if isBookmarked {
-                    Label("Bookmarked", systemImage: "bookmark.fill")
-                } else {
-                    Label("Add Bookmark", systemImage: "bookmark")
+                Button {
+                    onShowTabs()
+                } label: {
+                    Label("All Tabs", systemImage: "square.on.square")
                 }
             }
-            .disabled(urlText.isEmpty || isBookmarked)
-
-            Button {
-                onShowHistory()
-            } label: {
-                Label("History", systemImage: "clock")
-            }
-
-            Divider()
-
-            Button {
-                onGoHome()
-            } label: {
-                Label("Home", systemImage: "house")
-            }
+            .controlGroupStyle(.menu)
         } label: {
             Image(systemName: "ellipsis.circle")
                 .font(.title2)
                 .foregroundStyle(themeSettings.toolbarButtonColor)
                 .frame(width: 44, height: 44)
         }
+        .menuOrder(.fixed)
         .glassEffect(.regular.interactive())
         .transition(.opacity.combined(with: .scale(scale: 0.8)))
     }
