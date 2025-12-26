@@ -16,6 +16,7 @@ struct TitanApp: App {
             ContentView()
                 .environment(\.themeSettings, themeSettings)
                 .environmentObject(themeSettings)
+                .preferredColorScheme(themeSettings.appearanceMode.colorScheme)
         }
     }
 }

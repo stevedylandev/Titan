@@ -6,6 +6,31 @@
 import SwiftUI
 import Combine
 
+/// Appearance mode options
+enum AppearanceMode: String, CaseIterable, Identifiable {
+    case automatic = "Automatic"
+    case light = "Light"
+    case dark = "Dark"
+
+    var id: String { rawValue }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .automatic: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .automatic: return "circle.lefthalf.filled"
+        case .light: return "sun.max.fill"
+        case .dark: return "moon.fill"
+        }
+    }
+}
+
 /// Available font design options for the browser
 enum FontDesignOption: String, CaseIterable, Identifiable {
     case system = "System"
@@ -28,6 +53,9 @@ enum FontDesignOption: String, CaseIterable, Identifiable {
 /// Observable object that manages theme customization settings.
 /// This provides centralized accent color management that views can subscribe to.
 class ThemeSettings: ObservableObject {
+    /// The appearance mode (light, dark, or automatic)
+    @Published var appearanceMode: AppearanceMode = .automatic
+
     /// The primary accent color used for interactive elements like links and buttons
     @Published var accentColor: Color = .blue
 
@@ -43,11 +71,17 @@ class ThemeSettings: ObservableObject {
     /// The color used for toolbar buttons (navigation, menu, etc.)
     @Published var toolbarButtonColor: Color = .blue
 
-    /// The background color for the main content area
-    @Published var backgroundColor: Color = Color(UIColor.systemBackground)
+    /// The background color for the main content area (light mode)
+    @Published var lightBackgroundColor: Color = .white
 
-    /// The text color for content
-    @Published var textColor: Color = Color(UIColor.label)
+    /// The text color for content (light mode)
+    @Published var lightTextColor: Color = .black
+
+    /// The background color for the main content area (dark mode)
+    @Published var darkBackgroundColor: Color = Color(red: 0.1, green: 0.1, blue: 0.1)
+
+    /// The text color for content (dark mode)
+    @Published var darkTextColor: Color = .white
 
     /// The font design for content
     @Published var fontDesign: FontDesignOption = .monospaced
@@ -55,24 +89,63 @@ class ThemeSettings: ObservableObject {
     /// The home page URL that the browser navigates to on launch and when pressing Home
     @AppStorage("homePage") var homePage: String = "gemini://geminiprotocol.net/"
 
-    /// Key for persisting accent color hex value
+    /// Computed property for current background color based on system appearance
+    var backgroundColor: Color {
+        switch appearanceMode {
+        case .light:
+            return lightBackgroundColor
+        case .dark:
+            return darkBackgroundColor
+        case .automatic:
+            return Color(UIColor.systemBackground)
+        }
+    }
+
+    /// Computed property for current text color based on system appearance
+    var textColor: Color {
+        switch appearanceMode {
+        case .light:
+            return lightTextColor
+        case .dark:
+            return darkTextColor
+        case .automatic:
+            return Color(UIColor.label)
+        }
+    }
+
+    /// Key for persisting values
     private static let accentColorKey = "accentColorHex"
-    private static let backgroundColorKey = "backgroundColorKey"
-    private static let textColorKey = "textColorHex"
+    private static let appearanceModeKey = "appearanceMode"
+    private static let lightBackgroundColorKey = "lightBackgroundColorHex"
+    private static let lightTextColorKey = "lightTextColorHex"
+    private static let darkBackgroundColorKey = "darkBackgroundColorHex"
+    private static let darkTextColorKey = "darkTextColorHex"
     private static let fontDesignKey = "fontDesign"
 
     init() {
+        if let modeRaw = UserDefaults.standard.string(forKey: Self.appearanceModeKey),
+           let mode = AppearanceMode(rawValue: modeRaw) {
+            appearanceMode = mode
+        }
         if let hex = UserDefaults.standard.string(forKey: Self.accentColorKey),
            let color = Color(hex: hex) {
-            setAllAccentColors(color)
+            setAllAccentColors(color, persist: false)
         }
-        if let hex = UserDefaults.standard.string(forKey: Self.backgroundColorKey),
+        if let hex = UserDefaults.standard.string(forKey: Self.lightBackgroundColorKey),
            let color = Color(hex: hex) {
-            backgroundColor = color
+            lightBackgroundColor = color
         }
-        if let hex = UserDefaults.standard.string(forKey: Self.textColorKey),
+        if let hex = UserDefaults.standard.string(forKey: Self.lightTextColorKey),
            let color = Color(hex: hex) {
-            textColor = color
+            lightTextColor = color
+        }
+        if let hex = UserDefaults.standard.string(forKey: Self.darkBackgroundColorKey),
+           let color = Color(hex: hex) {
+            darkBackgroundColor = color
+        }
+        if let hex = UserDefaults.standard.string(forKey: Self.darkTextColorKey),
+           let color = Color(hex: hex) {
+            darkTextColor = color
         }
         if let fontRaw = UserDefaults.standard.string(forKey: Self.fontDesignKey),
            let font = FontDesignOption(rawValue: fontRaw) {
@@ -80,32 +153,54 @@ class ThemeSettings: ObservableObject {
         }
     }
 
-    /// Sets all accent colors to the given color and persists the choice
-    func setAllAccentColors(_ color: Color) {
+    /// Sets all accent colors to the given color and optionally persists the choice
+    func setAllAccentColors(_ color: Color, persist: Bool = true) {
         accentColor = color
         progressBarColor = color
         linkColor = color
         mediaAccentColor = color
         toolbarButtonColor = color
 
-        if let hex = color.toHex() {
+        if persist, let hex = color.toHex() {
             UserDefaults.standard.set(hex, forKey: Self.accentColorKey)
         }
     }
 
-    /// Sets the background color and persists the choice
-    func setBackgroundColor(_ color: Color) {
-        backgroundColor = color
+    /// Sets the appearance mode and persists the choice
+    func setAppearanceMode(_ mode: AppearanceMode) {
+        appearanceMode = mode
+        UserDefaults.standard.set(mode.rawValue, forKey: Self.appearanceModeKey)
+    }
+
+    /// Sets the light mode background color and persists the choice
+    func setLightBackgroundColor(_ color: Color) {
+        lightBackgroundColor = color
         if let hex = color.toHex() {
-            UserDefaults.standard.set(hex, forKey: Self.backgroundColorKey)
+            UserDefaults.standard.set(hex, forKey: Self.lightBackgroundColorKey)
         }
     }
 
-    /// Sets the text color and persists the choice
-    func setTextColor(_ color: Color) {
-        textColor = color
+    /// Sets the light mode text color and persists the choice
+    func setLightTextColor(_ color: Color) {
+        lightTextColor = color
         if let hex = color.toHex() {
-            UserDefaults.standard.set(hex, forKey: Self.textColorKey)
+            UserDefaults.standard.set(hex, forKey: Self.lightTextColorKey)
+        }
+    }
+
+    /// Sets the dark mode background color and persists the choice
+    func setDarkBackgroundColor(_ color: Color) {
+        darkBackgroundColor = color
+        if let hex = color.toHex() {
+            UserDefaults.standard.set(hex, forKey: Self.darkBackgroundColorKey)
+        }
+    }
+
+    /// Sets the dark mode text color and persists the choice
+    func setDarkTextColor(_ color: Color) {
+        darkTextColor = color
+        if let hex = color.toHex() {
+            UserDefaults.standard.set(hex, forKey: Self.darkTextColorKey)
         }
     }
 

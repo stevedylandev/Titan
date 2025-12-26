@@ -10,9 +10,12 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var homePageText: String = ""
+    @State private var selectedAppearanceMode: AppearanceMode = .automatic
     @State private var selectedAccentColor: Color = .blue
-    @State private var selectedBackgroundColor: Color = Color(UIColor.systemBackground)
-    @State private var selectedTextColor: Color = Color(UIColor.label)
+    @State private var selectedLightBackgroundColor: Color = .white
+    @State private var selectedLightTextColor: Color = .black
+    @State private var selectedDarkBackgroundColor: Color = .black
+    @State private var selectedDarkTextColor: Color = .white
     @State private var selectedFontDesign: FontDesignOption = .monospaced
 
     var body: some View {
@@ -30,18 +33,40 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Picker("Appearance", selection: $selectedAppearanceMode) {
+                        ForEach(AppearanceMode.allCases) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                } header: {
+                    Text("Theme")
+                } footer: {
+                    Text("Choose between light, dark, or automatic appearance.")
+                }
+
+                Section {
                     ColorPicker("Accent Color", selection: $selectedAccentColor, supportsOpacity: false)
-                    ColorPicker("Background Color", selection: $selectedBackgroundColor, supportsOpacity: false)
-                    ColorPicker("Text Color", selection: $selectedTextColor, supportsOpacity: false)
                     Picker("Font", selection: $selectedFontDesign) {
                         ForEach(FontDesignOption.allCases) { option in
                             Text(option.rawValue).tag(option)
                         }
                     }
                 } header: {
-                    Text("Appearance")
-                } footer: {
-                    Text("Customize the look of your browser interface.")
+                    Text("General")
+                }
+
+                Section {
+                    ColorPicker("Background", selection: $selectedLightBackgroundColor, supportsOpacity: false)
+                    ColorPicker("Text", selection: $selectedLightTextColor, supportsOpacity: false)
+                } header: {
+                    Text("Light Mode Colors")
+                }
+
+                Section {
+                    ColorPicker("Background", selection: $selectedDarkBackgroundColor, supportsOpacity: false)
+                    ColorPicker("Text", selection: $selectedDarkTextColor, supportsOpacity: false)
+                } header: {
+                    Text("Dark Mode Colors")
                 }
             }
             .navigationTitle("Settings")
@@ -55,9 +80,12 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         themeSettings.homePage = homePageText
+                        themeSettings.setAppearanceMode(selectedAppearanceMode)
                         themeSettings.setAllAccentColors(selectedAccentColor)
-                        themeSettings.setBackgroundColor(selectedBackgroundColor)
-                        themeSettings.setTextColor(selectedTextColor)
+                        themeSettings.setLightBackgroundColor(selectedLightBackgroundColor)
+                        themeSettings.setLightTextColor(selectedLightTextColor)
+                        themeSettings.setDarkBackgroundColor(selectedDarkBackgroundColor)
+                        themeSettings.setDarkTextColor(selectedDarkTextColor)
                         themeSettings.setFontDesign(selectedFontDesign)
                         dismiss()
                     }
@@ -65,9 +93,12 @@ struct SettingsView: View {
             }
             .onAppear {
                 homePageText = themeSettings.homePage
+                selectedAppearanceMode = themeSettings.appearanceMode
                 selectedAccentColor = themeSettings.accentColor
-                selectedBackgroundColor = themeSettings.backgroundColor
-                selectedTextColor = themeSettings.textColor
+                selectedLightBackgroundColor = themeSettings.lightBackgroundColor
+                selectedLightTextColor = themeSettings.lightTextColor
+                selectedDarkBackgroundColor = themeSettings.darkBackgroundColor
+                selectedDarkTextColor = themeSettings.darkTextColor
                 selectedFontDesign = themeSettings.fontDesign
             }
         }
