@@ -1,13 +1,13 @@
 //
-//  TitanParser.swift
+//  GeminiParser.swift
 //  Titan
 //
 
 import Foundation
 
-struct TitanParser {
-    static func parse(_ content: String, baseURL: String) -> [TitanLine] {
-        var lines: [TitanLine] = []
+struct GeminiParser {
+    static func parse(_ content: String, baseURL: String) -> [GeminiLine] {
+        var lines: [GeminiLine] = []
         var inPreformatted = false
         var preformattedLines: [String] = []
         var preformattedAlt = ""

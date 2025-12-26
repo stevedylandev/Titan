@@ -1,5 +1,5 @@
 //
-//  TitanClient.swift
+//  GeminiClient.swift
 //  Titan
 //
 //  Created by Steve Simkins on 12/20/25.
@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - Response Types
 
-struct TitanResponse {
+struct GeminiResponse {
     let statusCode: Int
     let meta: String
     let body: Data?
@@ -34,7 +34,7 @@ struct TitanResponse {
     }
 }
 
-enum TitanError: LocalizedError {
+enum GeminiError: LocalizedError {
     case invalidResponse
     case invalidURL
     case cancelled
@@ -50,7 +50,7 @@ enum TitanError: LocalizedError {
 
 // MARK: - Client
 
-class TitanClient {
+class GeminiClient {
     let rejectUnauthorized: Bool
     
     init(rejectUnauthorized: Bool = true) {
@@ -61,7 +61,7 @@ class TitanClient {
         hostname: String,
         port: Int = 1965,
         urlString: String
-    ) async throws -> TitanResponse {
+    ) async throws -> GeminiResponse {
         let host = NWEndpoint.Host(hostname)
         let port = NWEndpoint.Port(integerLiteral: UInt16(port))
 
@@ -87,7 +87,7 @@ class TitanClient {
         let state = ConnectionState()
 
         return try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<TitanResponse, Error>) in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<GeminiResponse, Error>) in
                 connection.stateUpdateHandler = { connectionState in
                     switch connectionState {
                     case .ready:
@@ -96,7 +96,7 @@ class TitanClient {
                             connection.cancel()
                             if !state.continuationResumed {
                                 state.continuationResumed = true
-                                continuation.resume(throwing: TitanError.cancelled)
+                                continuation.resume(throwing: GeminiError.cancelled)
                             }
                             return
                         }
@@ -125,7 +125,7 @@ class TitanClient {
                             // Check if this was a user-initiated cancellation
                             if state.wasCancelled {
                                 print("✓ Request cancelled\n")
-                                continuation.resume(throwing: TitanError.cancelled)
+                                continuation.resume(throwing: GeminiError.cancelled)
                             } else {
                                 print("✓ Connection closed by server\n")
                                 do {
@@ -167,22 +167,22 @@ class TitanClient {
         }
     }
 
-    private func parseResponse(_ data: Data) throws -> TitanResponse {
+    private func parseResponse(_ data: Data) throws -> GeminiResponse {
         // Find the first CRLF which separates header from body
         let crlf = Data([0x0D, 0x0A]) // \r\n
         guard let crlfRange = data.range(of: crlf) else {
-            throw TitanError.invalidResponse
+            throw GeminiError.invalidResponse
         }
 
         let headerData = data[..<crlfRange.lowerBound]
         guard let headerString = String(data: headerData, encoding: .utf8) else {
-            throw TitanError.invalidResponse
+            throw GeminiError.invalidResponse
         }
 
         // Parse status code (first 2 characters)
         guard headerString.count >= 2,
               let statusCode = Int(headerString.prefix(2)) else {
-            throw TitanError.invalidResponse
+            throw GeminiError.invalidResponse
         }
 
         // Meta is everything after status code and space
@@ -199,7 +199,7 @@ class TitanClient {
 
         print("📥 Status: \(statusCode), Meta: \(meta)")
 
-        return TitanResponse(statusCode: statusCode, meta: meta, body: body)
+        return GeminiResponse(statusCode: statusCode, meta: meta, body: body)
     }
     
     // Helper class to manage connection state

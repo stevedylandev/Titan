@@ -1,11 +1,11 @@
 //
-//  TitanLine.swift
+//  GeminiLine.swift
 //  Titan
 //
 
 import Foundation
 
-enum TitanLine {
+enum GeminiLine {
     case text(String)
     case link(url: String, label: String)
     case heading1(String)

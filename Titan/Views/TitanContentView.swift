@@ -61,7 +61,7 @@ struct TitanContentView: View {
     }
 
     var body: some View {
-        let lines = TitanParser.parse(content, baseURL: baseURL)
+        let lines = GeminiParser.parse(content, baseURL: baseURL)
 
         LazyVStack(alignment: .leading, spacing: 4) {
             ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
@@ -72,7 +72,7 @@ struct TitanContentView: View {
     }
 
     @ViewBuilder
-    private func lineView(for line: TitanLine) -> some View {
+    private func lineView(for line: GeminiLine) -> some View {
         switch line {
         case .text(let text):
             Text(text)

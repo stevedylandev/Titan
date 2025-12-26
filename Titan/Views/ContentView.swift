@@ -197,7 +197,7 @@ struct ContentView: View {
     }
 
     private func extractPageTitle() -> String? {
-        let lines = TitanParser.parse(responseText, baseURL: urlText)
+        let lines = GeminiParser.parse(responseText, baseURL: urlText)
         for line in lines {
             switch line {
             case .heading1(let text), .heading2(let text), .heading3(let text):
@@ -340,7 +340,7 @@ struct ContentView: View {
             } catch is CancellationError {
                 // Task was cancelled, don't update UI
                 return
-            } catch let error as TitanError where error == .cancelled {
+            } catch let error as GeminiError where error == .cancelled {
                 // Request was cancelled, don't update UI
                 return
             } catch {
@@ -350,16 +350,16 @@ struct ContentView: View {
         }
     }
 
-    private func fetchWithRedirects(urlString: String, redirectCount: Int) async throws -> (TitanResponse, String) {
+    private func fetchWithRedirects(urlString: String, redirectCount: Int) async throws -> (GeminiResponse, String) {
         // Check for cancellation before starting
         try Task.checkCancellation()
 
         guard let url = URL(string: urlString),
               let host = url.host else {
-            throw TitanError.invalidURL
+            throw GeminiError.invalidURL
         }
 
-        let client = TitanClient(rejectUnauthorized: false)
+        let client = GeminiClient(rejectUnauthorized: false)
         let port = url.port ?? 1965
         let response = try await client.connect(
             hostname: host,
