@@ -6,6 +6,25 @@
 import SwiftUI
 import Combine
 
+/// Available font design options for the browser
+enum FontDesignOption: String, CaseIterable, Identifiable {
+    case system = "System"
+    case monospaced = "Monospaced"
+    case serif = "Serif"
+    case rounded = "Rounded"
+
+    var id: String { rawValue }
+
+    var fontDesign: Font.Design {
+        switch self {
+        case .system: return .default
+        case .monospaced: return .monospaced
+        case .serif: return .serif
+        case .rounded: return .rounded
+        }
+    }
+}
+
 /// Observable object that manages theme customization settings.
 /// This provides centralized accent color management that views can subscribe to.
 class ThemeSettings: ObservableObject {
@@ -30,6 +49,9 @@ class ThemeSettings: ObservableObject {
     /// The text color for content
     @Published var textColor: Color = Color(UIColor.label)
 
+    /// The font design for content
+    @Published var fontDesign: FontDesignOption = .monospaced
+
     /// The home page URL that the browser navigates to on launch and when pressing Home
     @AppStorage("homePage") var homePage: String = "gemini://geminiprotocol.net/"
 
@@ -37,6 +59,7 @@ class ThemeSettings: ObservableObject {
     private static let accentColorKey = "accentColorHex"
     private static let backgroundColorKey = "backgroundColorHex"
     private static let textColorKey = "textColorHex"
+    private static let fontDesignKey = "fontDesign"
 
     init() {
         if let hex = UserDefaults.standard.string(forKey: Self.accentColorKey),
@@ -50,6 +73,10 @@ class ThemeSettings: ObservableObject {
         if let hex = UserDefaults.standard.string(forKey: Self.textColorKey),
            let color = Color(hex: hex) {
             textColor = color
+        }
+        if let fontRaw = UserDefaults.standard.string(forKey: Self.fontDesignKey),
+           let font = FontDesignOption(rawValue: fontRaw) {
+            fontDesign = font
         }
     }
 
@@ -80,6 +107,12 @@ class ThemeSettings: ObservableObject {
         if let hex = color.toHex() {
             UserDefaults.standard.set(hex, forKey: Self.textColorKey)
         }
+    }
+
+    /// Sets the font design and persists the choice
+    func setFontDesign(_ font: FontDesignOption) {
+        fontDesign = font
+        UserDefaults.standard.set(font.rawValue, forKey: Self.fontDesignKey)
     }
 }
 

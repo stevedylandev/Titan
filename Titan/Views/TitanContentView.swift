@@ -76,7 +76,7 @@ struct TitanContentView: View {
         switch line {
         case .text(let text):
             Text(text)
-                .font(.system(.body, design: .monospaced))
+                .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
                 .foregroundColor(themeSettings.textColor)
 
         case .link(let url, let label):
@@ -84,7 +84,7 @@ struct TitanContentView: View {
                 HStack(alignment:.top, spacing: 4) {
                     Text(label)
                         .multilineTextAlignment(.leading)
-                        .font(.system(size: 14, design: .monospaced))
+                        .font(.system(size: 14, design: themeSettings.fontDesign.fontDesign))
                 }
             }
             .foregroundColor(themeSettings.linkColor)
@@ -92,21 +92,21 @@ struct TitanContentView: View {
 
         case .heading1(let text):
             Text(text)
-                .font(.system(.title, design: .monospaced))
+                .font(.system(.title, design: themeSettings.fontDesign.fontDesign))
                 .fontWeight(.bold)
                 .foregroundColor(themeSettings.textColor)
                 .padding(.top, 8)
 
         case .heading2(let text):
             Text(text)
-                .font(.system(.title2, design: .monospaced))
+                .font(.system(.title2, design: themeSettings.fontDesign.fontDesign))
                 .fontWeight(.semibold)
                 .foregroundColor(themeSettings.textColor)
                 .padding(.top, 6)
 
         case .heading3(let text):
             Text(text)
-                .font(.system(.title3, design: .monospaced))
+                .font(.system(.title3, design: themeSettings.fontDesign.fontDesign))
                 .fontWeight(.medium)
                 .foregroundColor(themeSettings.textColor)
                 .padding(.top, 4)
@@ -116,12 +116,12 @@ struct TitanContentView: View {
                 Text("\u{2022}")
                 Text(text)
             }
-            .font(.system(.body, design: .monospaced))
+            .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
             .foregroundColor(themeSettings.textColor)
 
         case .quote(let text):
             Text(text)
-                .font(.system(.body, design: .monospaced))
+                .font(.system(.body, design: themeSettings.fontDesign.fontDesign))
                 .italic()
                 .foregroundColor(.secondary)
                 .padding(.leading, 12)

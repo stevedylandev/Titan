@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var selectedAccentColor: Color = .blue
     @State private var selectedBackgroundColor: Color = Color(UIColor.systemBackground)
     @State private var selectedTextColor: Color = Color(UIColor.label)
+    @State private var selectedFontDesign: FontDesignOption = .monospaced
 
     var body: some View {
         NavigationStack {
@@ -32,10 +33,15 @@ struct SettingsView: View {
                     ColorPicker("Accent Color", selection: $selectedAccentColor, supportsOpacity: false)
                     ColorPicker("Background Color", selection: $selectedBackgroundColor, supportsOpacity: false)
                     ColorPicker("Text Color", selection: $selectedTextColor, supportsOpacity: false)
+                    Picker("Font", selection: $selectedFontDesign) {
+                        ForEach(FontDesignOption.allCases) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
                 } header: {
                     Text("Appearance")
                 } footer: {
-                    Text("Customize the colors of your browser interface.")
+                    Text("Customize the look of your browser interface.")
                 }
             }
             .navigationTitle("Settings")
@@ -52,6 +58,7 @@ struct SettingsView: View {
                         themeSettings.setAllAccentColors(selectedAccentColor)
                         themeSettings.setBackgroundColor(selectedBackgroundColor)
                         themeSettings.setTextColor(selectedTextColor)
+                        themeSettings.setFontDesign(selectedFontDesign)
                         dismiss()
                     }
                 }
@@ -61,6 +68,7 @@ struct SettingsView: View {
                 selectedAccentColor = themeSettings.accentColor
                 selectedBackgroundColor = themeSettings.backgroundColor
                 selectedTextColor = themeSettings.textColor
+                selectedFontDesign = themeSettings.fontDesign
             }
         }
     }
