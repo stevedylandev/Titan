@@ -89,6 +89,9 @@ class ThemeSettings: ObservableObject {
     /// The home page URL that the browser navigates to on launch and when pressing Home
     @AppStorage("homePage") var homePage: String = "gemini://geminiprotocol.net/"
 
+    /// The search engine URL used for search queries (query appended after ?)
+    @AppStorage("searchEngine") var searchEngine: String = "gemini://kennedy.gemi.dev/search"
+
     /// Computed property for current background color based on system appearance
     var backgroundColor: Color {
         switch appearanceMode {

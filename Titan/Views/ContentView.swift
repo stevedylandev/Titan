@@ -219,9 +219,34 @@ struct ContentView: View {
         historyIndex < history.count - 1
     }
 
+    private func normalizeURL(_ input: String) -> String {
+        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return trimmed }
+
+        // If it already has a scheme, return as-is
+        let lowercased = trimmed.lowercased()
+        if lowercased.hasPrefix("gemini://") ||
+           lowercased.hasPrefix("http://") ||
+           lowercased.hasPrefix("https://") ||
+           lowercased.hasPrefix("mailto:") {
+            return trimmed
+        }
+
+        // Check if it looks like a domain (contains a dot, no spaces)
+        if trimmed.contains(".") && !trimmed.contains(" ") {
+            return "gemini://" + trimmed
+        }
+
+        // Otherwise treat as a search query
+        let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? trimmed
+        return themeSettings.searchEngine + "?" + encoded
+    }
+
     private func navigateTo(_ url: String) {
+        let normalizedURL = normalizeURL(url)
+
         // Check if this is an external URL (http, https, mailto)
-        if let urlObj = URL(string: url) {
+        if let urlObj = URL(string: normalizedURL) {
             let scheme = urlObj.scheme?.lowercased() ?? ""
             if scheme == "http" || scheme == "https" || scheme == "mailto" {
                 UIApplication.shared.open(urlObj)
@@ -233,7 +258,7 @@ struct ContentView: View {
             history = Array(history.prefix(historyIndex + 1))
         }
 
-        urlText = url
+        urlText = normalizedURL
         fetchContent(addToHistory: true)
     }
 

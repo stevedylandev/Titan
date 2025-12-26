@@ -10,6 +10,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var homePageText: String = ""
+    @State private var searchEngineText: String = ""
     @State private var selectedAppearanceMode: AppearanceMode = .automatic
     @State private var selectedAccentColor: Color = .blue
     @State private var selectedLightBackgroundColor: Color = .white
@@ -30,6 +31,17 @@ struct SettingsView: View {
                     Text("Home Page")
                 } footer: {
                     Text("The page that loads when you open the app or tap the Home button.")
+                }
+
+                Section {
+                    TextField("Search Engine URL", text: $searchEngineText)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.URL)
+                } header: {
+                    Text("Search Engine")
+                } footer: {
+                    Text("The search engine used when typing a search query. Your query will be appended after a \"?\".")
                 }
 
                 Section {
@@ -80,6 +92,7 @@ struct SettingsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         themeSettings.homePage = homePageText
+                        themeSettings.searchEngine = searchEngineText
                         themeSettings.setAppearanceMode(selectedAppearanceMode)
                         themeSettings.setAllAccentColors(selectedAccentColor)
                         themeSettings.setLightBackgroundColor(selectedLightBackgroundColor)
@@ -93,6 +106,7 @@ struct SettingsView: View {
             }
             .onAppear {
                 homePageText = themeSettings.homePage
+                searchEngineText = themeSettings.searchEngine
                 selectedAppearanceMode = themeSettings.appearanceMode
                 selectedAccentColor = themeSettings.accentColor
                 selectedLightBackgroundColor = themeSettings.lightBackgroundColor

@@ -92,11 +92,11 @@ struct BrowserToolbar: View {
     }
 
     private var urlTextField: some View {
-        TextField("Enter Gemini URL", text: $urlText)
+        TextField("gemini:// or search", text: $urlText)
             .focused(isURLFocused)
             .autocapitalization(.none)
             .disableAutocorrection(true)
-            .keyboardType(.URL)
+            .keyboardType(.webSearch)
             .submitLabel(.go)
             .onSubmit {
                 isURLFocused.wrappedValue = false
